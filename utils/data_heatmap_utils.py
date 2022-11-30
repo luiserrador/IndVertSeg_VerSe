@@ -76,6 +76,7 @@ def zoom_z(vol, heat):
 def rotate3D(vol, heat):
     """
     Rotate volume in 3 axis by angles between -10 and 10 degrees
+
     :param vol: volume - NumPy array
     :param heat: heatmap - NumPy array
     :return: rotated versions of volume and heatmap - NumPy array
@@ -161,6 +162,7 @@ def roll_imgs(vol, heat):
 def augment_data(img, heat):
     """
     Apply data augmentation
+
     :param img: volume image - NumPy array
     :param heat: heatmap - NumPy array
     :return: augmented version of volume and heatmap - NumPy array
