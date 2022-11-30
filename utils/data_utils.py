@@ -11,11 +11,17 @@ from scipy.ndimage import distance_transform_edt as distance
 
 
 def calc_centr(A):
+    """
+    Calcute the center of coordinates A
+
+    :param A: coordinates - NumPy array of shape [3, n]
+    :return: center of the coordinates - NumPy array
+    """
+
     length = len(A[0])
     sum_slice = np.sum(A[0])
     sum_h = np.sum(A[1])
     sum_w = np.sum(A[2])
-    # print(sum_slice/length, sum_h/length, sum_w/length)
 
     if sum_slice == 0:
         return np.array([0, 0, 0]).astype(int)
@@ -25,10 +31,22 @@ def calc_centr(A):
 
 
 def calc_centr_vertebras(mask_after_resamp, vert):
+    """
+    Calculate center of vertebra
+
+    :param mask_after_resamp: mask - NumPy array
+    :param vert: vert id - float or int
+    :return: center of vertebra
+    """
     return calc_centr(np.where(mask_after_resamp == vert))
 
 
 def calc_dist_map(seg):
+    """
+    Calcute the distance map of all pixels to the border of the vertebrae to be segmented
+    :param seg: output mask - NumPy Array
+    :return: distance map - NumPy array
+    """
     res = np.zeros_like(seg)
     posmask = seg.astype(np.bool)
 
@@ -40,6 +58,12 @@ def calc_dist_map(seg):
 
 
 def normalize_vol_std(vol):
+    """
+    Z-Score normalization of volume
+
+    :param vol: volume - NumPy array
+    :return: normalized volume - NumPy array
+    """
     vol_mean = np.mean(vol.flatten())
     vol_std = np.std(vol.flatten())
 
@@ -47,6 +71,14 @@ def normalize_vol_std(vol):
 
 
 def normalize_vol_max_min(vol, max_dt, min_dt):
+    """
+    Normalize volume to range [-1, 1]
+
+    :param vol: volume - NumPy array
+    :param max_dt: max value of volume or dataset - float
+    :param min_dt: min value of volume or dataset - float
+    :return: normalized volume - NumPy array
+    """
     center_range = (min_dt + max_dt) / 2
     range_values = (max_dt - min_dt) / 2
 
