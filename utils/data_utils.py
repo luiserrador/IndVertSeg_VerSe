@@ -1,0 +1,491 @@
+import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # uncomment to not use GPU
+
+import numpy as np
+import math
+
+from scipy.ndimage import zoom
+from scipy.ndimage.interpolation import rotate
+from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import distance_transform_edt as distance
+
+
+def calc_centr(A):
+    length = len(A[0])
+    sum_slice = np.sum(A[0])
+    sum_h = np.sum(A[1])
+    sum_w = np.sum(A[2])
+    # print(sum_slice/length, sum_h/length, sum_w/length)
+
+    if sum_slice == 0:
+        return np.array([0, 0, 0]).astype(int)
+    else:
+        return np.array([np.around(sum_slice / length), np.around(sum_h / length), np.around(sum_w / length)]).astype(
+            int)
+
+
+def calc_centr_vertebras(mask_after_resamp, vert):
+    return calc_centr(np.where(mask_after_resamp == vert))
+
+
+def calc_dist_map(seg):
+    res = np.zeros_like(seg)
+    posmask = seg.astype(np.bool)
+
+    if posmask.any():
+        negmask = ~posmask
+        res = distance(negmask) * negmask + distance(posmask) * posmask
+
+    return res
+
+
+def normalize_vol_std(vol):
+    vol_mean = np.mean(vol.flatten())
+    vol_std = np.std(vol.flatten())
+
+    return (vol - vol_mean) / vol_std
+
+
+def normalize_vol_max_min(vol, max_dt, min_dt):
+    center_range = (min_dt + max_dt) / 2
+    range_values = (max_dt - min_dt) / 2
+
+    vol = (vol - center_range) / range_values
+
+    return vol
+
+
+def padding_up_down(vol, mask):
+    vol1 = np.pad(vol, ((0, 0), (0, 0), (128, 128)))
+    mask1 = np.pad(mask, ((0, 0), (0, 0), (128, 128)))
+
+    return vol1, mask1
+
+
+def padding_up_down_ones(vol, mask):
+    vol1 = np.pad(vol, ((0, 0), (0, 0), (128, 128)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+    mask1 = np.pad(mask, ((0, 0), (0, 0), (128, 128)))
+
+    return vol1, mask1
+
+
+def check_padding(vol, mask):
+    patch_size = np.array((256, 256, 256))
+    padd = patch_size - np.array(vol.shape)
+
+    padd[padd < 0] = 0
+    padd = padd / 2
+
+    vol1 = np.pad(vol, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
+                        (math.ceil(padd[2]), math.ceil(padd[2]))))
+    mask1 = np.pad(mask, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
+                          (math.ceil(padd[2]), math.ceil(padd[2]))))
+
+    return vol1, mask1
+
+
+def check_padding_ones(vol, mask):
+    patch_size = np.array((256, 256, 256))
+    padd = patch_size - np.array(vol.shape)
+
+    padd[padd < 0] = 0
+    padd = padd / 2
+
+    vol1 = np.pad(vol, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
+                        (math.ceil(padd[2]), math.ceil(padd[2]))), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+    mask1 = np.pad(mask, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
+                          (math.ceil(padd[2]), math.ceil(padd[2]))))
+
+    return vol1, mask1
+
+
+def check_padding_ones_valid(vol, mask):
+    patch_size = np.array((128, 128, 128))
+    padd = patch_size - np.array(vol.shape)
+
+    padd[padd < 0] = 0
+    padd = padd / 2
+
+    vol1 = np.pad(vol, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
+                        (math.ceil(padd[2]), math.ceil(padd[2]))), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+    mask1 = np.pad(mask, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
+                          (math.ceil(padd[2]), math.ceil(padd[2]))))
+
+    return vol1, mask1
+
+
+def rand_mul_shi_vox(vol):
+    """
+    Multiplies the volume and shifts the volume image
+
+    :param vol: volume - NumPy array
+    :return: volume (with shifted and multiplied histogram) - NumPy array
+    """
+
+    mult = np.random.uniform(high=1.25, low=0.75)
+    vox_shift = np.random.uniform(low=-0.25, high=0.25)
+    vol = vol * mult
+    vol = vol + vox_shift
+
+    return vol
+
+
+def flip_vol(vol, memory, mask):
+    """
+    Flip left-right
+
+    :param vol: volume - NumPy array
+    :param memory: memory mask - NumPy array
+    :param mask: output mask - NumPy array
+    :return: left-right fliped version of the volume, memory and mask - NumPy array
+    """
+
+    vol = np.flip(vol, 1)
+    memory = np.flip(memory, 1)
+    mask = np.flip(mask, 1)
+
+    return vol, memory, mask
+
+
+def zoom_z(vol, memory, mask):
+    """
+    Zoom volume in 3 axis
+
+    :param vol: volume - NumPy array
+    :param memory: memory mask - NumPy array
+    :param mask: output mask - NumPy array
+    :return: zoomed version of volume, memory and mask - NumPy array
+    """
+
+    zoom_P = np.random.uniform(low=0.8, high=1.2)
+    zoom_R = np.random.uniform(low=0.8, high=1.2)
+    zoom_I = np.random.uniform(low=0.7, high=1.3)
+
+    vol = zoom(vol, (zoom_P, zoom_R, zoom_I), order=3, mode='nearest')
+    memory = zoom(memory, (zoom_P, zoom_R, zoom_I), order=0)
+    mask = zoom(mask, (zoom_P, zoom_R, zoom_I), order=0)
+
+    return vol, memory, mask
+
+
+def rotate3D(vol, memory, mask):
+    """
+    Rotate volume in 3 axis by angles between -20 and 20 degrees
+    :param vol: volume - NumPy array
+    :param memory: memory mask - NumPy array
+    :param mask: output mask - NumPy array
+    :return: rotated versions of volume, memory and mask - NumPy array
+    """
+
+    rot_P = np.random.uniform(low=-20, high=20)
+    rot_R = np.random.uniform(low=-20, high=20)
+    rot_I = np.random.uniform(low=-20, high=20)
+
+    vol = rotate(vol, rot_R, axes=(0, 2), order=3, mode='nearest')
+    vol = rotate(vol, rot_P, axes=(1, 2), order=3, mode='nearest')
+    vol = rotate(vol, rot_I, axes=(0, 1), order=3, mode='nearest')
+
+    memory = rotate(memory, rot_R, axes=(0, 2), order=0)
+    memory = rotate(memory, rot_P, axes=(1, 2), order=0)
+    memory = rotate(memory, rot_I, axes=(0, 1), order=0)
+
+    mask = rotate(mask, rot_R, axes=(0, 2), order=0)
+    mask = rotate(mask, rot_P, axes=(1, 2), order=0)
+    mask = rotate(mask, rot_I, axes=(0, 1), order=0)
+
+    return vol, memory, mask
+
+
+def gauss_noise(vol):
+    """
+    Add gaussian noise to volume
+
+    :param vol: volume - NumPy array
+    :return: noisy version of the volume - NumPy array
+    """
+
+    noise = np.random.normal(loc=0.0, scale=np.random.uniform(low=0.001, high=0.03), size=vol.shape)
+    vol = vol + noise
+
+    return vol
+
+
+def gauss_blur(vol):
+    """
+    Apply gaussian filter to volume
+
+    :param vol: volume - NumPy array
+    :return: filtered version of the volume - NumPy array
+    """
+
+    sigma = np.random.uniform(low=0.5, high=1.5)
+    truncKernel = np.random.randint(low=3, high=7)
+
+    vol = gaussian_filter(vol, sigma, truncate=truncKernel)
+
+    return vol
+
+
+def clean_memory(memory):
+    """
+    Clean memory
+
+    :param memory: memory mask - NumPy array
+    :return: all-zero memory mask - NumPy array
+    """
+
+    memory = np.zeros(memory.shape)
+
+    return memory
+
+
+def roll_imgs(vol, memory, mask, slice_bef, nb_1s):
+    """
+    Apply translation to images
+
+    :param vol: volume - NumPy array
+    :param memory: memory mask - NumPy array
+    :param mask: output mask - NumPy array
+    :param slice_bef: coordinates where to start cropping - NumPy array
+    :param nb_1s: number of voxels == 1 at output mask - NumPy array
+    :return: translated volume, memory, mask and new slice_bef - NumPy array
+    """
+
+    check_1s = 0
+
+    if np.sum(memory) == 0:
+
+        slice_bef[2] = np.amin(np.where(mask == 1)[2]) - 2
+
+        while check_1s < nb_1s / 3:
+            roll_P = slice_bef[0] + np.random.randint(low=-64, high=64)
+            roll_R = slice_bef[1] + np.random.randint(low=-64, high=64)
+            roll_I = slice_bef[2] + np.random.randint(low=0, high=64)
+
+            check_1s = np.where(mask[roll_P:roll_P + 128, roll_R:roll_R + 128, roll_I:roll_I + 128] == 1)[0].size
+
+        slice_bef[0] = roll_P
+        slice_bef[1] = roll_R
+        slice_bef[2] = roll_I
+
+        if slice_bef[0] + 128 > vol.shape[0]:
+            pad_value = slice_bef[0] + 128 - vol.shape[0] + 1
+            vol = np.pad(vol, ((0, pad_value), (0, 0), (0, 0)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+            memory = np.pad(memory, ((0, pad_value), (0, 0), (0, 0)))
+            mask = np.pad(mask, ((0, pad_value), (0, 0), (0, 0)))
+
+        if slice_bef[1] + 128 > vol.shape[1]:
+            pad_value = slice_bef[1] + 128 - vol.shape[1] + 1
+            vol = np.pad(vol, ((0, 0), (0, pad_value), (0, 0)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+            memory = np.pad(memory, ((0, 0), (0, pad_value), (0, 0)))
+            mask = np.pad(mask, ((0, 0), (0, pad_value), (0, 0)))
+
+        if slice_bef[2] + 128 > vol.shape[2]:
+            pad_value = slice_bef[2] + 128 - vol.shape[2] + 1
+            vol = np.pad(vol, ((0, 0), (0, 0), (0, pad_value)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+            memory = np.pad(memory, ((0, 0), (0, 0), (0, pad_value)))
+            mask = np.pad(mask, ((0, 0), (0, 0), (0, pad_value)))
+
+    else:
+
+        while check_1s < nb_1s / 3:
+            roll_P = slice_bef[0] + np.random.randint(low=-32, high=32)
+            roll_R = slice_bef[1] + np.random.randint(low=-32, high=32)
+            roll_I = slice_bef[2] + np.random.randint(low=-32, high=32)
+
+            check_1s = np.where(mask[roll_P:roll_P + 128, roll_R:roll_R + 128, roll_I:roll_I + 128] == 1)[0].size
+
+        slice_bef[0] = roll_P
+        slice_bef[1] = roll_R
+        slice_bef[2] = roll_I
+
+        if slice_bef[0] + 128 > vol.shape[0]:
+            pad_value = slice_bef[0] + 128 - vol.shape[0] + 1
+            vol = np.pad(vol, ((0, pad_value), (0, 0), (0, 0)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+            memory = np.pad(memory, ((0, pad_value), (0, 0), (0, 0)))
+            mask = np.pad(mask, ((0, pad_value), (0, 0), (0, 0)))
+
+        if slice_bef[1] + 128 > vol.shape[1]:
+            pad_value = slice_bef[1] + 128 - vol.shape[1] + 1
+            vol = np.pad(vol, ((0, 0), (0, pad_value), (0, 0)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+            memory = np.pad(memory, ((0, 0), (0, pad_value), (0, 0)))
+            mask = np.pad(mask, ((0, 0), (0, pad_value), (0, 0)))
+
+        if slice_bef[2] + 128 > vol.shape[2]:
+            pad_value = slice_bef[2] + 128 - vol.shape[2] + 1
+            vol = np.pad(vol, ((0, 0), (0, 0), (0, pad_value)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
+            memory = np.pad(memory, ((0, 0), (0, 0), (0, pad_value)))
+            mask = np.pad(mask, ((0, 0), (0, 0), (0, pad_value)))
+
+    vol = vol[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
+    vol = np.where(vol > 1, 1, vol)
+    vol = np.where(vol < -1, -1, vol)
+    memory = memory[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
+    mask = mask[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
+
+    return vol, memory, mask
+
+
+######################################### KD DATASET #####################################################
+
+# def process_img_train(ind):
+#     img_vert = array_training_img[ind]
+#
+#     patch_nifti = nib.load(training_raw[img_vert[0]])
+#     mask_patch_nifti = nib.load(training_derivatives[img_vert[0]])
+#
+#     patch = patch_nifti.get_fdata()
+#     mask_patch = mask_patch_nifti.get_fdata()
+#
+#     mask_save = np.where(mask_patch == img_vert[1], 1, 0)
+#     memory_save = np.where((mask_patch < img_vert[1]) & (mask_patch != 0), 1, 0)
+#     nb_1s = np.where(mask_save == 1)[0].size
+#
+#     ## -> AUGMENTATION
+#     if np.random.uniform() > 0.5:
+#         patch, memory_save, mask_save = flip_vol(patch, memory_save, mask_save)
+#     patch = rand_mul_shi_vox(patch)
+#     patch, memory_save, mask_save = zoom_z(patch, memory_save, mask_save, nb_1s)
+#     patch, memory_save, mask_save = rotate3D(patch, memory_save, mask_save, nb_1s)
+#     if np.random.uniform() > 0.2:
+#         patch = gauss_noise(patch)
+#     if np.random.uniform() > 0.2:
+#         patch = gauss_blur(patch)
+#     if np.random.uniform() > 0.7:
+#         memory_save = clean_memory(memory_save)
+#     nb_1s = np.where(mask_save == 1)[0].size
+#
+#     slice_bef = calc_centr_vertebras(mask_save, 1)
+#     slice_bef = slice_bef - 64
+#
+#     for f in range(3):
+#         if slice_bef[f] + 128 >= mask_save.shape[f]:
+#             overplus = slice_bef[f] + 128 - mask_save.shape[f]
+#             slice_bef[f] = slice_bef[f] - overplus
+#         elif slice_bef[f] < 0:
+#             slice_bef[f] = 0
+#
+#     patch, memory_save, mask_save, slice_bef = roll_imgs(patch, memory_save, mask_save, slice_bef, nb_1s)
+#
+#     ## -> SLICE 128X128X128
+#
+#     patch = patch[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
+#     patch = np.where(patch > 1, 1, patch)
+#     patch = np.where(patch < -1, -1, patch)
+#     memory_save = memory_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
+#                   slice_bef[2]:slice_bef[2] + 128]
+#     mask_save = mask_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
+#                 slice_bef[2]:slice_bef[2] + 128]
+#
+#     ## -> X = patch + memory
+#
+#     x = np.zeros((128, 128, 128, 2))
+#     x[:, :, :, 0] = patch
+#     x[:, :, :, 1] = memory_save
+#
+#     ## -> Y = mask + distance map
+#
+#     dist = calc_dist_map(mask_save)
+#     y = np.zeros((128, 128, 128, 2))
+#     y[:, :, :, 0] = mask_save
+#     y[:, :, :, 1] = dist
+#
+#     return x, y
+#
+#
+# def get_img_train(i):
+#     i = i.numpy()  # Decoding from the EagerTensor object
+#     x, y = process_img_train(i)
+#     return x, y
+#
+#
+# def getTrainingDataset():
+#     z = tf.range(2814)
+#
+#     dataset = tf.data.Dataset.from_generator(lambda: z, tf.int32)
+#
+#     dataset = dataset.shuffle(buffer_size=len(z), reshuffle_each_iteration=True)
+#
+#     dataset = dataset.map(lambda i: tf.py_function(func=get_img_train,
+#                                                    inp=[i],
+#                                                    Tout=[tf.float32,
+#                                                          tf.float32]
+#                                                    ),
+#                           num_parallel_calls=8)
+#
+#     dataset = dataset.batch(BATCH_SIZE).repeat().prefetch(1)
+#
+#     return dataset
+#
+#
+# def process_img_valid(ind):
+#     img_vert = array_valid_img[ind]
+#
+#     patch_nifti = nib.load(valid_raw[img_vert[0]])
+#     mask_patch_nifti = nib.load(valid_derivatives[img_vert[0]])
+#
+#     patch = patch_nifti.get_fdata()
+#     mask_patch = mask_patch_nifti.get_fdata()
+#
+#     mask_save = np.where(mask_patch == img_vert[1], 1, 0)
+#     memory_save = np.where((mask_patch < img_vert[1]) & (mask_patch != 0), 1, 0)
+#
+#     slice_bef = calc_centr_vertebras(mask_save, 1)
+#     slice_bef = slice_bef - 64
+#
+#     for f in range(3):
+#         if slice_bef[f] + 128 >= mask_save.shape[f]:
+#             overplus = slice_bef[f] + 128 - mask_save.shape[f]
+#             slice_bef[f] = slice_bef[f] - overplus
+#         elif slice_bef[f] < 0:
+#             slice_bef[f] = 0
+#
+#     ## -> SLICE 128X128X128
+#
+#     patch = patch[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
+#     patch = np.where(patch > 1, 1, patch)
+#     patch = np.where(patch < -1, -1, patch)
+#     memory_save = memory_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
+#                   slice_bef[2]:slice_bef[2] + 128]
+#     mask_save = mask_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
+#                 slice_bef[2]:slice_bef[2] + 128]
+#
+#     ## -> X = patch + memory
+#
+#     x = np.zeros((128, 128, 128, 2))
+#     x[:, :, :, 0] = patch
+#     x[:, :, :, 1] = memory_save
+#
+#     ## -> Y = mask + distance map
+#
+#     dist = calc_dist_map(mask_save)
+#     y = np.zeros((128, 128, 128, 2))
+#     y[:, :, :, 0] = mask_save
+#     y[:, :, :, 1] = dist
+#
+#     return x, y
+#
+#
+# def get_img_valid(i):
+#     i = i.numpy()  # Decoding from the EagerTensor object
+#     x, y = process_img_valid(i)
+#     return x, y
+#
+#
+# def getValidDataset():
+#     z = tf.range(1494)
+#
+#     dataset = tf.data.Dataset.from_generator(lambda: z, tf.int32)
+#
+#     dataset = dataset.shuffle(buffer_size=len(z), reshuffle_each_iteration=True)
+#
+#     dataset = dataset.map(lambda i: tf.py_function(func=get_img_valid,
+#                                                    inp=[i],
+#                                                    Tout=[tf.float32,
+#                                                          tf.float32]
+#                                                    ),
+#                           num_parallel_calls=8)
+#
+#     dataset = dataset.batch(BATCH_SIZE).repeat().prefetch(1)
+#
+#     return dataset
