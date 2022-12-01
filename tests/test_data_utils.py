@@ -39,6 +39,15 @@ class MyTestCase(unittest.TestCase):
 
         center_value = dist_map[25, 25, 25]
 
+        figure1 = plt.figure()
+        figure1.suptitle('testCalcDistMap: sphere_data')
+        plt.imshow(sphere_data[:, :, 25])
+
+        figure2 = plt.figure()
+        figure2.suptitle('testCalcDistMap: dist_map')
+        plt.imshow(dist_map[:, :, 25])
+        plt.show()
+
         assert center_value == 5.0
 
     def testNormalizeVolStd(self):
@@ -73,8 +82,7 @@ class MyTestCase(unittest.TestCase):
         assert abs(np.mean(new_data.ravel())) > 0.05
         assert np.std(new_data.ravel()) < 0.8
 
-    ## TODO
-    # Test paddings
+    # TODO: test paddings
 
     def testFlipVol(self):
         
