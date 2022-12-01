@@ -1,4 +1,8 @@
-import os
+"""data_utils.py: Everything for data augmentation on VerSe dataset."""
+
+__author__ = "Luis Serrador"
+
+# import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # uncomment to not use GPU
 
 import numpy as np
