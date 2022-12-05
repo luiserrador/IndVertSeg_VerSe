@@ -3,6 +3,7 @@
 __author__ = "Luis Serrador"
 
 from utils.data_heatmap_utils import *
+from utils.data_utils import normalize_vol_max_min
 import matplotlib.pyplot as plt
 
 
@@ -140,7 +141,121 @@ def zoom_z_example():
     plt.show()
 
 
+def rotate3D_example():
+    """rotate3D example"""
+
+    np.random.seed(1)
+
+    radius = 20
+
+    xx, yy, zz = np.mgrid[:64, :64, :128]
+    sphere_data = (xx - 32) ** 2 + (yy - 32) ** 2 + (zz - 100) ** 2
+    sphere_data = np.logical_and(sphere_data < radius**2, sphere_data > 0).astype(np.float)
+
+    new_sphere1 = zoom_z(sphere_data, sphere_data)
+    new_sphere = rotate3D(new_sphere1[0], new_sphere1[0])
+
+    x, y, z = np.where(new_sphere1[0] > 0.5)
+    new_x, new_y, new_z = np.where(new_sphere[0] > 0.5)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 2, 1, projection='3d')
+    ax.scatter(x, y, z, color='red')
+    ax.axes.set_xlim3d(0, 64)
+    ax.axes.set_ylim3d(0, 64)
+    ax.axes.set_zlim3d(0, 128)
+    ax.set_title('Original volume')
+    ax.view_init(elev=180, azim=0)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    ax1 = fig.add_subplot(1, 2, 2, projection='3d')
+    ax1.scatter(new_x, new_y, new_z, color='red')
+    ax1.axes.set_xlim3d(0, 64)
+    ax1.axes.set_ylim3d(0, 64)
+    ax1.axes.set_zlim3d(0, 128)
+    ax1.set_title('Rotated volume')
+    ax1.view_init(elev=180, azim=0)
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.set_zlabel('Z')
+
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+    plt.show()
+
+
+def gauss_noise_example():
+    """gauss_noise example"""
+
+    np.random.seed(1)
+
+    radius = 10
+
+    xx, yy, zz = np.mgrid[:50, :50, :50]
+    sphere_data = (xx - 25) ** 2 + (yy - 25) ** 2 + (zz - 25) ** 2
+    sphere_data = np.logical_and(sphere_data < radius**2, sphere_data > 0).astype(np.float)
+    sphere_data[25, 25, 25] = 1
+    sphere_data = normalize_vol_max_min(sphere_data, np.max(sphere_data), np.min(sphere_data))
+    new_data = gauss_noise(sphere_data)
+
+    fig = plt.figure()
+
+    ax = fig.add_subplot(1, 2, 1)
+    ax.hist(sphere_data.ravel(), bins=800)
+    ax.set_title('Original data histogram')
+
+    ax1 = fig.add_subplot(1, 2, 2)
+    ax1.hist(new_data.ravel(), bins=800)
+    ax1.set_title('Noisy data histogram')
+
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+    plt.show()
+
+
+def gauss_blur_example():
+    """gauss_blur example"""
+
+    np.random.seed(1)
+
+    radius = 10
+
+    xx, yy, zz = np.mgrid[:50, :50, :50]
+    sphere_data = (xx - 25) ** 2 + (yy - 25) ** 2 + (zz - 25) ** 2
+    sphere_data = np.logical_and(sphere_data < radius**2, sphere_data > 0).astype(np.float)
+    sphere_data[25, 25, 25] = 1
+    sphere_data = normalize_vol_max_min(sphere_data, np.max(sphere_data), np.min(sphere_data))
+    new_data = gauss_blur(sphere_data)
+
+    fig = plt.figure()
+
+    ax = fig.add_subplot(2, 2, 1)
+    ax.hist(sphere_data.ravel(), bins=800)
+    ax.set_title('Original data histogram')
+
+    ax1 = fig.add_subplot(2, 2, 2)
+    ax1.hist(new_data.ravel(), bins=800)
+    ax1.set_title('Blurred data histogram')
+
+    ax2 = fig.add_subplot(2, 2, 3)
+    ax2.imshow(sphere_data[:, :, 25], cmap='gray')
+    ax2.set_title('Slice of original sphere')
+
+    ax3 = fig.add_subplot(2, 2, 4)
+    ax3.imshow(new_data[:, :, 25], cmap='gray')
+    ax3.set_title('Slice of blurred sphere')
+
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+    plt.show()
+
+
 if __name__ == '__main__':
     # rand_mul_shi_vox_example()
     # flip_vol_example()
-    zoom_z_example()
+    # zoom_z_example()
+    # rotate3D_example()
+    # gauss_noise_example()
+    gauss_blur_example()
