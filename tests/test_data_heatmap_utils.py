@@ -122,7 +122,7 @@ class MyTestCase(unittest.TestCase):
 
         new_data = roll_imgs(sphere_data, sphere_data)
 
-    def TestAugmentatData(self):
+    def testAugmentatData(self):
         """Test augment_data"""
 
         np.random.seed(2**32-50)
