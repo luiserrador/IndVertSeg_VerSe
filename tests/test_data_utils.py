@@ -1,12 +1,11 @@
 import unittest
 
-import matplotlib.pyplot as plt
-
 from utils.data_utils import *
 
 
 class MyTestCase(unittest.TestCase):
     def testCalcCentr(self):
+        """Test calc_centr"""
 
         xx, yy, zz = np.mgrid[:50, :50, :50]
         sphere_data = (xx - 25) ** 2 + (yy - 25) ** 2 + (zz - 25) ** 2
@@ -17,6 +16,7 @@ class MyTestCase(unittest.TestCase):
         assert np.array_equal(cir_centr, [25, 25, 25])
 
     def testCalcCentrVert(self):
+        """Test calc_centr_vert"""
 
         xx, yy, zz = np.mgrid[:50, :50, :50]
         sphere_data = (xx - 25) ** 2 + (yy - 25) ** 2 + (zz - 25) ** 2
@@ -27,6 +27,7 @@ class MyTestCase(unittest.TestCase):
         assert np.array_equal(cir_centr, [25, 25, 25])
 
     def testCalcDistMap(self):
+        """Test calc_dist_map"""
 
         radius = 5
 
@@ -39,18 +40,11 @@ class MyTestCase(unittest.TestCase):
 
         center_value = dist_map[25, 25, 25]
 
-        figure1 = plt.figure()
-        figure1.suptitle('testCalcDistMap: sphere_data')
-        plt.imshow(sphere_data[:, :, 25])
-
-        figure2 = plt.figure()
-        figure2.suptitle('testCalcDistMap: dist_map')
-        plt.imshow(dist_map[:, :, 25])
-        plt.show()
-
         assert center_value == 5.0
 
     def testNormalizeVolStd(self):
+        """Test normalize_vol_std"""
+
         np.random.seed(1)
 
         data = (np.random.normal(size=[50, 50, 50]) * 5) + 30
@@ -64,6 +58,8 @@ class MyTestCase(unittest.TestCase):
         assert abs(np.std(new_data.ravel())) - 1 < 1e-10
 
     def testNormalizeVolMaxMin(self):
+        """Test normalize_vol_max_min"""
+
         np.random.seed(1)
 
         data = (np.random.normal(size=[50, 50, 50]) * 5) + 30
@@ -74,6 +70,8 @@ class MyTestCase(unittest.TestCase):
         assert abs(np.min(new_data)) - 1 < 1e-4
 
     def testRandMulShiVox(self):
+        """Test rand_mult_shi_vox"""
+
         np.random.seed(1)
 
         data = np.random.normal(size=[50, 50, 50])
@@ -85,6 +83,7 @@ class MyTestCase(unittest.TestCase):
     # TODO: test paddings
 
     def testFlipVol(self):
+        """Test flip_vol"""
         
         radius = 10
 
@@ -103,6 +102,8 @@ class MyTestCase(unittest.TestCase):
         assert distance_border3 == radius
 
     def testZoomZ(self):
+        """Test zoom_z"""
+
         np.random.seed(1)
 
         radius = 20
@@ -134,6 +135,8 @@ class MyTestCase(unittest.TestCase):
         assert new_depth_sphere == new_depth_sphere1 == new_depth_sphere2 == 36
 
     def testRotate3D(self):
+        """Test rotate3D"""
+
         np.random.seed(1)
 
         radius = 10
@@ -159,6 +162,8 @@ class MyTestCase(unittest.TestCase):
         assert np.array_equal(centr_sphere2, new_centr)
 
     def testGaussNoise(self):
+        """Tets gauss_noise"""
+
         np.random.seed(30)
 
         radius = 10
@@ -170,6 +175,8 @@ class MyTestCase(unittest.TestCase):
         new_data = gauss_noise(sphere_data)
 
     def testGaussBlur(self):
+        """Tets gauss_blur"""
+
         np.random.seed(30)
 
         radius = 10
@@ -181,6 +188,8 @@ class MyTestCase(unittest.TestCase):
         new_data = gauss_blur(sphere_data)
 
     def testRollImgs(self):
+        """Tets clean_memory and roll_imgs"""
+
         np.random.seed(2**32-50)
 
         radius = 25

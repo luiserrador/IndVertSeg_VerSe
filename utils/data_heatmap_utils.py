@@ -1,3 +1,7 @@
+"""data_heatmap_utils.py: Everything for data augmentation on VerSe dataset, for spine location heatmap prediction."""
+
+__author__ = "Luis Serrador"
+
 import numpy as np
 
 from scipy.ndimage import zoom
