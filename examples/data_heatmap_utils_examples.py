@@ -253,9 +253,9 @@ def gauss_blur_example():
 
 
 if __name__ == '__main__':
-    # rand_mul_shi_vox_example()
-    # flip_vol_example()
-    # zoom_z_example()
-    # rotate3D_example()
-    # gauss_noise_example()
+    rand_mul_shi_vox_example()
+    flip_vol_example()
+    zoom_z_example()
+    rotate3D_example()
+    gauss_noise_example()
     gauss_blur_example()
