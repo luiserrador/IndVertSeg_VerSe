@@ -1,3 +1,7 @@
+"""test_data_utils.py: Tests on data_utils.py."""
+
+__author__ = "Luis Serrador"
+
 import unittest
 
 from utils.data_utils import *
