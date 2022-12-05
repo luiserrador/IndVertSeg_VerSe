@@ -7,6 +7,7 @@ import numpy as np
 from utils.data_utils import *
 import matplotlib.pyplot as plt
 
+
 def calc_centr_example():
     """calc_centr example"""
 
@@ -48,7 +49,7 @@ def calc_dist_map_example():
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 2, 1, projection='3d')
-    ax.scatter(x, y, z, color='red')
+    ax.scatter(x, y, z, color='red', marker='o', alpha=0.2, edgecolors=None, linewidths=0.0)
     ax.axes.set_xlim3d(0, 50)
     ax.axes.set_ylim3d(0, 50)
     ax.axes.set_zlim3d(0, 50)
