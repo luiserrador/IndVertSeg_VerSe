@@ -1,1 +1,1 @@
-# IndVertSeg_VerSe
+# Individual Vertebrae Segmentation on VerSe Dataset
