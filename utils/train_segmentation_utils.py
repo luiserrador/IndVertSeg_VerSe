@@ -205,14 +205,12 @@ class DatasetHandler:
     def get_datasets(self):
 
         # distribute the dataset according to the strategy
-        # train_dist_ds = tf.distribute.get_strategy().experimental_distribute_dataset(self.getTrainingDataset())
-        train_dist_ds = self.getTrainingDataset()
+        train_dist_ds = tf.distribute.get_strategy().experimental_distribute_dataset(self.getTrainingDataset())
         # train_dist_ds = get_training_dataset(fold_train_filenames)
 
         # Hitting End Of Dataset exceptions is a problem in this setup. Using a repeated validation set instead.
         # This will introduce a slight inaccuracy because the validation dataset now has some repeated elements.
-        # valid_dist_ds = tf.distribute.get_strategy().experimental_distribute_dataset(self.getValidDataset())
-        valid_dist_ds = self.getValidDataset()
+        valid_dist_ds = tf.distribute.get_strategy().experimental_distribute_dataset(self.getValidDataset())
         # valid_dist_ds = get_validation_dataset(fold_valid_filenames, repeated=True)
 
         train_data_iter = iter(train_dist_ds)  # the training data iterator is repeated and it is not reset
