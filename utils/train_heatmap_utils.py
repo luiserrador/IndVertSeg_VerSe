@@ -22,8 +22,8 @@ class ArtificialDataset(tf.data.Dataset):
 
         #         training_raw = Path('D:/Datasets/VerSe19-20/Gaussian/Training/vol_ctd/')
         #         training_ctd = Path('D:/Datasets/VerSe19-20/Gaussian/Training/ctd/')
-        training_raw = Path('D:/Datasets/VerSe19-20/Gaussian/Training/vol_ctd/')
-        training_ctd = Path('D:/Datasets/VerSe19-20/Gaussian/Training/ctd/')
+        training_raw = Path('Gaussian/Training/vol_ctd/')
+        training_ctd = Path('Gaussian/Training/ctd/')
 
         training_raw = [f for f in training_raw.resolve().glob('*.npy') if f.is_file()]
         training_ctd = [f for f in training_ctd.resolve().glob('*.json') if f.is_file()]
@@ -84,8 +84,8 @@ class ArtificialDatasetValid(tf.data.Dataset):
 
         #         training_raw = Path('D:/Datasets/VerSe19-20/Gaussian/Validation/vol_ctd/')
         #         training_ctd = Path('D:/Datasets/VerSe19-20/Gaussian/Validation/ctd/')
-        training_raw = Path('D:/Datasets/VerSe19-20/Gaussian/Validation/vol_ctd/')
-        training_ctd = Path('D:/Datasets/VerSe19-20/Gaussian/Validation/ctd/')
+        training_raw = Path('Gaussian/Validation/vol_ctd/')
+        training_ctd = Path('Gaussian/Validation/ctd/')
 
         training_raw = [f for f in training_raw.resolve().glob('*.npy') if f.is_file()]
         training_ctd = [f for f in training_ctd.resolve().glob('*.json') if f.is_file()]
