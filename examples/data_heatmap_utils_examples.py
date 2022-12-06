@@ -252,6 +252,112 @@ def gauss_blur_example():
     plt.show()
 
 
+def roll_imgs_example():
+    """roll_imgs example"""
+
+    np.random.seed(15)
+
+    radius = np.random.uniform(0, 20, [4])
+    cent1 = np.random.uniform(0, 64, [4])
+    cent2 = np.random.uniform(0, 64, [4])
+    cent3 = np.random.uniform(0, 128, [4])
+
+    xx, yy, zz = np.mgrid[:64, :64, :128]
+    indx = 0
+    data = np.zeros((64, 64, 128))
+    for rad in radius:
+        sphere_data = (xx - cent1[indx]) ** 2 + (yy - cent2[indx]) ** 2 + (zz - cent3[indx]) ** 2
+        data = data + np.logical_and(sphere_data < rad**2, sphere_data > 0).astype(np.float)
+        indx += 1
+
+    new_data = roll_imgs(data, data)
+
+    x, y, z = np.where(data == 1)
+    x1, y1, z1 = np.where(new_data[0] == 1)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 2, 1, projection='3d')
+    ax.scatter(x, y, z, color='red')
+    ax.axes.set_xlim3d(0, 64)
+    ax.axes.set_ylim3d(0, 64)
+    ax.axes.set_zlim3d(0, 128)
+    ax.set_title('Original volume')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    ax1 = fig.add_subplot(1, 2, 2, projection='3d')
+    ax1.scatter(x1, y1, z1, color='red')
+    ax1.axes.set_xlim3d(0, 64)
+    ax1.axes.set_ylim3d(0, 64)
+    ax1.axes.set_zlim3d(0, 128)
+    ax1.set_title('Rolled volume')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.set_zlabel('Z')
+
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+    plt.show()
+
+
+def augment_data_example():
+    """augment_data example"""
+
+    np.random.seed(2 ** 32 - 50)
+
+    radius = np.random.uniform(0, 30, [4])
+    cent1 = np.random.uniform(0, 64, [4])
+    cent2 = np.random.uniform(0, 64, [4])
+    cent3 = np.random.uniform(0, 128, [4])
+
+    xx, yy, zz = np.mgrid[:64, :64, :128]
+    indx = 0
+    data = np.zeros((64, 64, 128))
+    for rad in radius:
+        sphere_data = (xx - cent1[indx]) ** 2 + (yy - cent2[indx]) ** 2 + (zz - cent3[indx]) ** 2
+        data = data + np.logical_and(sphere_data < rad**2, sphere_data > 0).astype(np.float)
+        indx += 1
+
+    new_data, _ = augment_data(data, data)
+
+    x, y, z = np.where(data == 1)
+    x1, y1, z1 = np.where(new_data > 0.45)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(2, 2, 1, projection='3d')
+    ax.scatter(x, y, z, color='red')
+    ax.axes.set_xlim3d(0, 64)
+    ax.axes.set_ylim3d(0, 64)
+    ax.axes.set_zlim3d(0, 128)
+    ax.set_title('Original volume')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    ax1 = fig.add_subplot(2, 2, 2, projection='3d')
+    ax1.scatter(x1, y1, z1, color='red')
+    ax1.axes.set_xlim3d(0, 64)
+    ax1.axes.set_ylim3d(0, 64)
+    ax1.axes.set_zlim3d(0, 128)
+    ax1.set_title('Augmented volume')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.set_zlabel('Z')
+
+    ax2 = fig.add_subplot(2, 2, 3)
+    ax2.hist(data.ravel(), bins=800)
+    ax2.set_title('Original data histogram')
+
+    ax3 = fig.add_subplot(2, 2, 4)
+    ax3.hist(new_data.ravel(), bins=800)
+    ax3.set_title('Final data histogram')
+
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+    plt.show()
+
+
 if __name__ == '__main__':
     rand_mul_shi_vox_example()
     flip_vol_example()
@@ -259,3 +365,5 @@ if __name__ == '__main__':
     rotate3D_example()
     gauss_noise_example()
     gauss_blur_example()
+    roll_imgs_example()
+    augment_data_example()
