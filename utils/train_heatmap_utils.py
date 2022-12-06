@@ -20,8 +20,6 @@ def gaussian(xL, yL, zL, H, W, D, sigma=10):
 class ArtificialDataset(tf.data.Dataset):
     def _generator(num_samples):
 
-        #         training_raw = Path('D:/Datasets/VerSe19-20/Gaussian/Training/vol_ctd/')
-        #         training_ctd = Path('D:/Datasets/VerSe19-20/Gaussian/Training/ctd/')
         training_raw = Path('Gaussian/Training/vol_ctd/')
         training_ctd = Path('Gaussian/Training/ctd/')
 
@@ -82,8 +80,6 @@ class ArtificialDatasetValid(tf.data.Dataset):
 
     def _generator(num_samples):
 
-        #         training_raw = Path('D:/Datasets/VerSe19-20/Gaussian/Validation/vol_ctd/')
-        #         training_ctd = Path('D:/Datasets/VerSe19-20/Gaussian/Validation/ctd/')
         training_raw = Path('Gaussian/Validation/vol_ctd/')
         training_ctd = Path('Gaussian/Validation/ctd/')
 
