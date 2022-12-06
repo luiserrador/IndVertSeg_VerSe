@@ -127,15 +127,20 @@ class ArtificialDatasetValid(tf.data.Dataset):
         )
 
 
-def get_training_dataset():
-    dataset = ArtificialDataset().shuffle(40).batch(batch_size).repeat().prefetch(AUTO)
-    #     dataset = ArtificialDataset().batch(batch_size).prefetch(AUTO)
+def get_training_dataset(batch_size):
+    dataset = ArtificialDataset().shuffle(40).batch(batch_size).repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
     return dataset
 
 
-def get_valid_dataset():
-    #     dataset = ArtificialDatasetValid().batch(batch_size).prefetch(AUTO)
-    dataset = ArtificialDatasetValid().batch(batch_size).repeat().prefetch(AUTO)
+def get_valid_dataset(batch_size):
+    dataset = ArtificialDatasetValid().batch(batch_size).repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
     return dataset
+
+
+def get_datasets(batch_size):
+    training_dataset = tf.distribute.get_strategy().experimental_distribute_dataset(get_training_dataset(batch_size))
+    valid_dataset = tf.distribute.get_strategy().experimental_distribute_dataset(get_valid_dataset(batch_size))
+
+    return training_dataset, valid_dataset
