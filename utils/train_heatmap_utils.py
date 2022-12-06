@@ -2,14 +2,15 @@ import math
 import tensorflow as tf
 from pathlib import Path
 
-from data_heatmap_utils import *
-from data_utilities import load_centroids
-from data_utils import normalize_vol_max_min
+from utils.data_heatmap_utils import *
+from utils.data_utilities import load_centroids
+from utils.data_utils import normalize_vol_max_min
+from ML_3D_Unet.utils.layers_func import create_unet3d
 
 
 def gaussian(xL, yL, zL, H, W, D, sigma=10):
-
-    channel = [math.exp(-((c - xL) ** 2 + (r - yL) ** 2 + (t - zL) ** 2) / (2 * sigma ** 2)) for r in range(H) for c in range(W) for t in range(D)]
+    channel = [math.exp(-((c - xL) ** 2 + (r - yL) ** 2 + (t - zL) ** 2) / (2 * sigma ** 2)) for r in range(H) for c in
+               range(W) for t in range(D)]
     channel = np.array(channel, dtype=np.float32)
     channel = np.reshape(channel, newshape=(H, W, D))
 
@@ -144,3 +145,34 @@ def get_datasets(batch_size):
     valid_dataset = tf.distribute.get_strategy().experimental_distribute_dataset(get_valid_dataset(batch_size))
 
     return training_dataset, valid_dataset
+
+
+def get_unet_heatmap():
+    model = create_unet3d([64, 64, 128, 1], n_convs=2, n_filters=[8, 16, 32, 64], ksize=[3, 3, 3], padding='same',
+                          activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=4,
+                          upsampling=True)
+
+    x = model.layers[-3].output
+    x = tf.keras.layers.Conv3D(2, 1, padding='same')(x)
+    x = tf.keras.layers.Activation('sigmoid')(x)
+
+    new_model = tf.keras.models.Model(inputs=model.input, outputs=x)
+
+    for _ in range(6):
+        new_model._layers.pop(4)
+
+    return new_model
+
+
+def kl_dice(y_true, y_pred):
+    kl = tf.keras.losses.KLDivergence()
+    first_term = kl(y_true, y_pred)
+    inse = tf.reduce_sum(tf.multiply(y_pred, y_true))
+    l = tf.reduce_sum(y_pred)
+    r = tf.reduce_sum(y_true)
+    dice = (2. * inse) / (l + r)
+    last_dice = 1 - dice
+
+    loss = first_term + last_dice
+
+    return loss
