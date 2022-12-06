@@ -349,6 +349,16 @@ class Trainer:
                     self.manager.save()
                     np.save(self.step_dir, self.step)
 
+                    print('Saving Data')
+                    A = os.path.join(self.model_dir, 'val_loss.txt')
+                    np.savetxt(A, history['val_loss'])
+                    A = os.path.join(self.model_dir, 'val_acc.txt')
+                    np.savetxt(A, history['val_acc'])
+                    A = os.path.join(self.model_dir, 'loss.txt')
+                    np.savetxt(A, history['loss'])
+                    A = os.path.join(self.model_dir, 'acc.txt')
+                    np.savetxt(A, history['acc'])
+
                     # set up next epoch
                     self.epoch = self.step // STEPS_PER_EPOCH
                     epoch_steps = 0
