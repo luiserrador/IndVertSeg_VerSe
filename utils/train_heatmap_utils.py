@@ -39,10 +39,10 @@ class ArtificialDataset(tf.data.Dataset):
             img = np.clip(img, -1024, 3071)
             ctd_iso = load_centroids(training_ctd[ind_img[r]])
 
-            heat_sv = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
+            heat = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
 
             for _, coordx, coordy, coordz in ctd_iso[1:]:
-                heat_sv += gaussian(coordx, coordy, coordz, 64, 64, 128)
+                heat += gaussian(coordx, coordy, coordz, 64, 64, 128)
 
             heat = heat / np.max(heat)
 
@@ -96,10 +96,10 @@ class ArtificialDatasetValid(tf.data.Dataset):
             img = np.clip(img, -1024, 3071)
             ctd_iso = load_centroids(training_ctd[r])
 
-            heat_sv = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
+            heat = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
 
             for _, coordx, coordy, coordz in ctd_iso[1:]:
-                heat_sv += gaussian(coordx, coordy, coordz, 64, 64, 128)
+                heat += gaussian(coordx, coordy, coordz, 64, 64, 128)
 
             heat = heat / np.max(heat)
 

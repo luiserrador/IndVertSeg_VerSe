@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import tensorflow as tf
 
 from utils.train_segmentation_utils import DatasetHandler, Trainer
