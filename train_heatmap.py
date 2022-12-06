@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from ML_3D_Unet.utils.train import Trainer
 from utils.train_heatmap_utils import *
 
