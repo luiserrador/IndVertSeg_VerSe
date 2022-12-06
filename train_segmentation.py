@@ -13,7 +13,8 @@ datasets = DatasetHandler(training_directory, validation_directory, training_siz
 train_data, valid_data = datasets.get_datasets()
 
 with tf.distribute.get_strategy().scope():
-    model = create_unet3d([128, 128, 128, 2], n_convs=2, n_filters=[16, 32, 64, 128], ksize=[3, 3, 3], padding='same', activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=4, upsampling=True)
+    model = create_unet3d([128, 128, 128, 2], n_convs=2, n_filters=[16, 32, 64, 128], ksize=[3, 3, 3], padding='same',
+                          activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=4, upsampling=True)
 model.summary()
 
 lr = 1e-3
@@ -22,4 +23,5 @@ model_dir = 'tf_ckpt_teacher_scratch'
 n_epochs = 45
 
 trainer = Trainer(model, optimizer, lr, model_dir)
-trainer.train(train_ds=train_data, valid_ds=valid_data, train_size=training_size, validation_size=validation_size, BATCH_SIZE=batch_size, EPOCHS=45)
+trainer.train(train_ds=train_data, valid_ds=valid_data, train_size=training_size, validation_size=validation_size,
+              BATCH_SIZE=batch_size, EPOCHS=45)
