@@ -125,7 +125,7 @@ class DatasetHandler:
                                                        Tout=[tf.float32,
                                                              tf.float32]
                                                        ),
-                              num_parallel_calls=self.AUTO)
+                              num_parallel_calls=8)
 
         dataset = dataset.batch(self.batch_size).repeat().prefetch(1)
 
@@ -196,7 +196,7 @@ class DatasetHandler:
                                                        Tout=[tf.float32,
                                                              tf.float32]
                                                        ),
-                              num_parallel_calls=self.AUTO)
+                              num_parallel_calls=7)
 
         dataset = dataset.batch(self.batch_size).repeat().prefetch(1)
 

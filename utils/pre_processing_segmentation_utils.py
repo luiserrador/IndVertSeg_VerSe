@@ -7,6 +7,13 @@ from utils.data_utilities import reorient_to, resample_nib
 
 
 def get_to_balance_array(training_derivatives):
+    """
+    Get array with number of examples to repeat by vertebra label
+
+    :param training_derivatives: list of directories to training masks
+    :return: array with the number of times to train on each vertebra by label (C1, C2, ...)
+    """
+
     nb_vert = np.zeros(28)
 
     for j in range(len(training_derivatives)):
@@ -18,7 +25,7 @@ def get_to_balance_array(training_derivatives):
 
         for r in range(1, 29):
 
-            if np.where(msk == r)[0].size > 0:
+            if r in msk:
                 nb_vert[r - 1] += 1
 
     mul_vert = np.amax(nb_vert) / nb_vert
@@ -27,6 +34,14 @@ def get_to_balance_array(training_derivatives):
 
 
 def get_array_data_training(training_derivatives, mul_vert=None):
+    """
+    Get array with file index and vertebra label to balance dataset
+
+    :param training_derivatives: list of directories to training masks
+    :param mul_vert: array with the number of times to train on each vertebra by type (C1, C2, ...)
+    :return: array with shape [number of images, 2], where [:, 1] is the file index and [:, 2] the vertebra label
+    """
+
     if not mul_vert:
         mul_vert = np.load('mul_vert.npy')
 
@@ -43,7 +58,7 @@ def get_array_data_training(training_derivatives, mul_vert=None):
 
         for r in range(1, 26):
 
-            if np.where(msk == r)[0].size > 0:
+            if r in msk:
 
                 mult = mul_vert[r - 1]
 
@@ -63,6 +78,15 @@ def get_array_data_training(training_derivatives, mul_vert=None):
 
 
 def save_iso_croped_data(training_raw, training_derivatives, arrayData=None):
+    """
+    Resample volumes to isometric dimensions, crop an [256, 256, 256] volume around vertebra and save.
+
+    :param training_raw: list of directories to training volumes
+    :param training_derivatives: list of directories to training masks
+    :param arrayData: array to balance data
+    :return: None
+    """
+
     if not arrayData:
         arrayData = np.load('arrayData_balanced.npy')
 
@@ -131,9 +155,9 @@ def save_iso_croped_data(training_raw, training_derivatives, arrayData=None):
                          centr_vert[1]:centr_vert[1] + slice_size[1],
                          centr_vert[2]:centr_vert[2] + slice_size[2]]
 
-            imgNifti = nib.Nifti1Image(imgs_after_resamp, affine=img_nib.affine)
+            imgNifti = nib.Nifti1Image(imgs_after_resamp, affine=img_iso.affine)
             print('Img Size: ', imgNifti.header['dim'][1:4])
-            mskNifti = nib.Nifti1Image(mask_patch, affine=msk_nib.affine)
+            mskNifti = nib.Nifti1Image(mask_patch, affine=msk_iso.affine)
             print('Mask Size: ', mskNifti.header['dim'][1:4])
 
             if i + 1 < 10:
@@ -163,3 +187,5 @@ def save_iso_croped_data(training_raw, training_derivatives, arrayData=None):
 
     print('# Saved Images: ', i)
     print('# Images Balanced: ', len(array_img))
+
+    return
