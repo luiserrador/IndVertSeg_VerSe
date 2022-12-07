@@ -20,7 +20,8 @@ if not os.path.exists('VerSe19'):
                   bar=bar_progress)
 
     print('\nDownloading VerSe19 Validation Data')
-    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19validation.zip', out='VerSe19/Validation',
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19validation.zip',
+                  out='VerSe19/Validation',
                   bar=bar_progress)
 
     print('\nDownloading VerSe19 Test Data')
@@ -35,7 +36,8 @@ if not os.path.exists('VerSe20'):
                   bar=bar_progress)
 
     print('\nDownloading VerSe20 Validation Data')
-    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20validation.zip', out='VerSe20/Validation',
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20validation.zip',
+                  out='VerSe20/Validation',
                   bar=bar_progress)
 
     print('Downloading VerSe20 Test Data')
@@ -73,23 +75,17 @@ print('\Extracting VerSe20 data')
 archive = zipfile.ZipFile('VerSe20/Training')
 
 for file in archive.namelist():
-    if file.startswith('dataset-verse20training/derivatives/'):
-        archive.extract(file, 'VerSe20/')
-    elif file.startswith('dataset-verse20training/rawdata/'):
+    if (file.startswith('dataset-01training/derivatives/') or file.startswith('dataset-01training/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe20/')
 
 archive = zipfile.ZipFile('VerSe20/Validation')
 
 for file in archive.namelist():
-    if file.startswith('dataset-verse20validation/derivatives/'):
-        archive.extract(file, 'VerSe20/')
-    elif file.startswith('dataset-verse20validation/rawdata/'):
+    if (file.startswith('dataset-02validation/derivatives/') or file.startswith('dataset-02validation/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe20/')
 
 archive = zipfile.ZipFile('VerSe20/Test')
 
 for file in archive.namelist():
-    if file.startswith('dataset-verse20test/derivatives/'):
-        archive.extract(file, 'VerSe20/')
-    elif file.startswith('dataset-verse20test/rawdata/'):
+    if (file.startswith('dataset-03test/derivatives/') or file.startswith('dataset-03test/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe20/')
