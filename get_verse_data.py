@@ -40,11 +40,11 @@ if not os.path.exists('VerSe20'):
                   out='VerSe20/Validation',
                   bar=bar_progress)
 
-    print('Downloading VerSe20 Test Data')
+    print('\nDownloading VerSe20 Test Data')
     wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20test.zip', out='VerSe20/Test',
                   bar=bar_progress)
 
-print('\Extracting VerSe19 data')
+print('\nExtracting VerSe19 data')
 
 archive = zipfile.ZipFile('VerSe19/Training')
 
@@ -70,7 +70,7 @@ for file in archive.namelist():
     elif file.startswith('dataset-verse19test/rawdata/'):
         archive.extract(file, 'VerSe19/')
 
-print('\Extracting VerSe20 data')
+print('\nExtracting VerSe20 data')
 
 archive = zipfile.ZipFile('VerSe20/Training')
 
@@ -89,3 +89,6 @@ archive = zipfile.ZipFile('VerSe20/Test')
 for file in archive.namelist():
     if (file.startswith('dataset-03test/derivatives/') or file.startswith('dataset-03test/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe20/')
+
+
+
