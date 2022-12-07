@@ -1,6 +1,7 @@
 import wget
 import sys
 import os
+import zipfile
 
 
 # create this bar_progress method which is invoked automatically from wget
@@ -14,29 +15,81 @@ def bar_progress(current, total, width=80):
 if not os.path.exists('VerSe19'):
     os.mkdir('Verse19')
 
+    print('Downloading VerSe19 Training Data')
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19training.zip', out='VerSe19/Training',
+                  bar=bar_progress)
+
+    print('\nDownloading VerSe19 Validation Data')
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19validation.zip', out='VerSe19/Validation',
+                  bar=bar_progress)
+
+    print('\nDownloading VerSe19 Test Data')
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19test.zip', out='VerSe19/Test',
+                  bar=bar_progress)
+
 if not os.path.exists('VerSe20'):
     os.mkdir('Verse20')
 
-print('Downloading VerSe19 Training Data')
-wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19training.zip', out='VerSe19/Training',
-              bar=bar_progress)
+    print('\nDownloading VerSe20 Training Data')
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20training.zip', out='VerSe20/Training',
+                  bar=bar_progress)
 
-print('\nDownloading VerSe19 Validation Data')
-wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19validation.zip', out='VerSe19/Validation',
-              bar=bar_progress)
+    print('\nDownloading VerSe20 Validation Data')
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20validation.zip', out='VerSe20/Validation',
+                  bar=bar_progress)
 
-print('\nDownloading VerSe19 Test Data')
-wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse19test.zip', out='VerSe19/Test',
-              bar=bar_progress)
+    print('Downloading VerSe20 Test Data')
+    wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20test.zip', out='VerSe20/Test',
+                  bar=bar_progress)
 
-print('\nDownloading VerSe20 Training Data')
-wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20training.zip', out='VerSe20/Training',
-              bar=bar_progress)
+print('\Extracting VerSe19 data')
 
-print('\nDownloading VerSe20 Validation Data')
-wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20validation.zip', out='VerSe20/Validation',
-              bar=bar_progress)
+archive = zipfile.ZipFile('VerSe19/Training')
 
-print('Downloading VerSe20 Test Data')
-wget.download('https://s3.bonescreen.de/public/VerSe-complete/dataset-verse20test.zip', out='VerSe20/Test',
-              bar=bar_progress)
+for file in archive.namelist():
+    if file.startswith('dataset-verse19training/derivatives/'):
+        archive.extract(file, 'VerSe19/')
+    elif file.startswith('dataset-verse19training/rawdata/'):
+        archive.extract(file, 'VerSe19/')
+
+archive = zipfile.ZipFile('VerSe19/Validation')
+
+for file in archive.namelist():
+    if file.startswith('dataset-verse19validation/derivatives/'):
+        archive.extract(file, 'VerSe19/')
+    elif file.startswith('dataset-verse19validation/rawdata/'):
+        archive.extract(file, 'VerSe19/')
+
+archive = zipfile.ZipFile('VerSe19/Test')
+
+for file in archive.namelist():
+    if file.startswith('dataset-verse19test/derivatives/'):
+        archive.extract(file, 'VerSe19/')
+    elif file.startswith('dataset-verse19test/rawdata/'):
+        archive.extract(file, 'VerSe19/')
+
+print('\Extracting VerSe20 data')
+
+archive = zipfile.ZipFile('VerSe20/Training')
+
+for file in archive.namelist():
+    if file.startswith('dataset-verse20training/derivatives/'):
+        archive.extract(file, 'VerSe20/')
+    elif file.startswith('dataset-verse20training/rawdata/'):
+        archive.extract(file, 'VerSe20/')
+
+archive = zipfile.ZipFile('VerSe20/Validation')
+
+for file in archive.namelist():
+    if file.startswith('dataset-verse20validation/derivatives/'):
+        archive.extract(file, 'VerSe20/')
+    elif file.startswith('dataset-verse20validation/rawdata/'):
+        archive.extract(file, 'VerSe20/')
+
+archive = zipfile.ZipFile('VerSe20/Test')
+
+for file in archive.namelist():
+    if file.startswith('dataset-verse20test/derivatives/'):
+        archive.extract(file, 'VerSe20/')
+    elif file.startswith('dataset-verse20test/rawdata/'):
+        archive.extract(file, 'VerSe20/')
