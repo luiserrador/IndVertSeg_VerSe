@@ -1,3 +1,7 @@
+"""pre_processing_segmentation_utils.py: Everything for processing and prepare VerSe dataset for vertebrae segmentation training."""
+
+__author__ = "Luis Serrador"
+
 import os
 import numpy as np
 import nibabel as nib

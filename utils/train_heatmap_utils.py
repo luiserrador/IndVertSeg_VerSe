@@ -1,3 +1,7 @@
+"""train_heatmap_utils.py: Everything for data handling and training for spine location heatmap prediction on VerSe dataset."""
+
+__author__ = "Luis Serrador"
+
 import math
 import tensorflow as tf
 from pathlib import Path

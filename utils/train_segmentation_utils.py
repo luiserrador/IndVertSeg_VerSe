@@ -1,3 +1,7 @@
+"""train_segmentation_utils.py: Everything for data handling and training for vertebrae segmentation on VerSe dataset."""
+
+__author__ = "Luis Serrador"
+
 import os
 import nibabel as nib
 import tensorflow as tf
