@@ -1,6 +1,6 @@
 # Individual Vertebrae Segmentation on VerSe Dataset
 
-This is the implementation of iterative vertebrae segmentation on VerSe datasets (2019 and 2020). Vertebrae segmentation is accomplished by first finding the spine location on CT volume and then performing an iterative segmentation of vertebrae from top to down:
+This is the implementation of iterative vertebrae segmentation on [VerSe](https://github.com/anjany/verse) datasets (2019 and 2020). Vertebrae segmentation is accomplished by first finding the spine location on CT volume and then performing an iterative segmentation of vertebrae from top to down:
 <p align="center">
   <img src="https://github.com/luiserrador/IndVertSeg_VerSe/blob/master/images/seg_algorithm.png" width=400>
 </p>
@@ -11,7 +11,7 @@ After moving to the repo directory, the first thing to do is to clone [ML_3D_Une
 ```
 $ git clone https://github.com/luiserrador/ML_3D_Unet.git
 ```
-Download [VerSe](https://github.com/anjany/verse) dataset:
+Download VerSe dataset:
 ```
 $ python get_verse_data.py
 ```
