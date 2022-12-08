@@ -7,14 +7,19 @@ This is the implementation of iterative vertebrae segmentation on VerSe datasets
 
 Note: [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) needed.
 
-# Usage
+# 1. Usage
 
 After moving to the repo directory, the first thing to do after is to clone [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) which is needed:
 ```
 $ git clone https://github.com/luiserrador/ML_3D_Unet.git
 ```
 Download [VerSe](https://github.com/anjany/verse) dataset:
-
 ```
 $ python get_verse_data.py
 ```
+## 1.1 Training spine location network
+
+- TODO
+
+## 1.2 Training segmentation network
+
