@@ -5,8 +5,6 @@ This is the implementation of iterative vertebrae segmentation on VerSe datasets
   <img src="https://github.com/luiserrador/IndVertSeg_VerSe/blob/master/images/seg_algorithm.png" width=400>
 </p>
 
-Note: [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) needed.
-
 # 1. Usage
 
 After moving to the repo directory, the first thing to do is to clone [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) repo which is needed:
