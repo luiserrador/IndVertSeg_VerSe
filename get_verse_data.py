@@ -4,10 +4,9 @@ import os
 import zipfile
 
 
-# create this bar_progress method which is invoked automatically from wget
+# create bar_progress method which is invoked automatically from wget
 def bar_progress(current, total, width=80):
     progress_message = "Downloading: %d%% [%d / %d] bytes" % (current / total * 100, current, total)
-    # Don't use print() as it will print in new line every time.
     sys.stdout.write("\r" + progress_message)
     sys.stdout.flush()
 
@@ -53,25 +52,19 @@ print('\nExtracting VerSe19 data')
 archive = zipfile.ZipFile('VerSe19/Training')
 
 for file in archive.namelist():
-    if file.startswith('dataset-verse19training/derivatives/'):
-        archive.extract(file, 'VerSe19/')
-    elif file.startswith('dataset-verse19training/rawdata/'):
+    if (file.startswith('dataset-verse19training/derivatives/') or file.startswith('dataset-verse19training/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe19/')
 
 archive = zipfile.ZipFile('VerSe19/Validation')
 
 for file in archive.namelist():
-    if file.startswith('dataset-verse19validation/derivatives/'):
-        archive.extract(file, 'VerSe19/')
-    elif file.startswith('dataset-verse19validation/rawdata/'):
+    if (file.startswith('dataset-verse19validation/derivatives/') or file.startswith('dataset-verse19validation/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe19/')
 
 archive = zipfile.ZipFile('VerSe19/Test')
 
 for file in archive.namelist():
-    if file.startswith('dataset-verse19test/derivatives/'):
-        archive.extract(file, 'VerSe19/')
-    elif file.startswith('dataset-verse19test/rawdata/'):
+    if (file.startswith('dataset-verse19test/derivatives/') or file.startswith('dataset-verse19test/rawdata/')) and (file.endswith('.nii.gz') or file.endswith('.json')):
         archive.extract(file, 'VerSe19/')
 
 print('\nExtracting VerSe20 data')
