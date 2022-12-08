@@ -9,7 +9,7 @@ Note: [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) needed.
 
 # 1. Usage
 
-After moving to the repo directory, the first thing to do after is to clone [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) which is needed:
+After moving to the repo directory, the first thing to do is to clone [ML_3D_Unet](https://github.com/luiserrador/ML_3D_Unet) repo which is needed:
 ```
 $ git clone https://github.com/luiserrador/ML_3D_Unet.git
 ```
