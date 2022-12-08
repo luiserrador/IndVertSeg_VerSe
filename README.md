@@ -13,7 +13,7 @@ After moving to the repo directory, the first thing to do after is to clone [ML_
 ```
 $ git clone https://github.com/luiserrador/ML_3D_Unet.git
 ```
-Download [VerSe] (https://github.com/anjany/verse) dataset:
+Download [VerSe](https://github.com/anjany/verse) dataset:
 
 ```
 $ python get_verse_data.py
