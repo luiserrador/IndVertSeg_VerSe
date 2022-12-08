@@ -22,4 +22,7 @@ $ python get_verse_data.py
 - TODO
 
 ## 1.2 Training segmentation network
-
+```
+$ python pre_processing_segmentation.py
+$ python train_segmentation.py
+```
