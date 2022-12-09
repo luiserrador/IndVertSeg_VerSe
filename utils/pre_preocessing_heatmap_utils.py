@@ -5,6 +5,12 @@ import skimage.transform as skTrans
 
 
 def ctd_iso_resamp(ctd_iso, img_shape):
+    """
+    Resample centroid coordinates to be according the new volume shape (64x64x128)
+    :param ctd_iso: centroids
+    :param img_shape: original volume shape
+    :return: resample centroids
+    """
     for j in range(1, len(ctd_iso)):
         ctd_iso[j][1] = ctd_iso[j][1] / img_shape[0] * 64
         ctd_iso[j][2] = ctd_iso[j][2] / img_shape[1] * 64
@@ -14,6 +20,12 @@ def ctd_iso_resamp(ctd_iso, img_shape):
 
 
 def save_heatmap_data_training(training_raw, training_points):
+    """
+    Save training volumes and heatmaps for spine location
+    :param training_raw: directorys of training volumes
+    :param training_points: directorys of training centroids
+    :return: None
+    """
 
     save_path = 'Gaussian/Training/'
 
@@ -54,6 +66,12 @@ def save_heatmap_data_training(training_raw, training_points):
 
 
 def save_heatmap_data_validation(valid_raw, valid_points):
+    """
+    Save validation volumes and heatmaps for spine location
+    :param valid_raw: directorys of validation volumes
+    :param valid_points: directorys of validation centroids
+    :return: None
+    """
 
     save_path = 'Gaussian/Validation/'
 

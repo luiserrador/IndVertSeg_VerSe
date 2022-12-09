@@ -29,6 +29,15 @@ class DatasetHandler:
     """
 
     def __init__(self, training_directory, validation_directory, training_size, validation_size, batch_size):
+        """
+        Init dataset handler
+
+        :param training_directory: training files directory
+        :param validation_directory: validation files directory
+        :param training_size: size of the training dataset
+        :param validation_size: size of the validation size
+        :param batch_size: batch size
+        """
         self.array_training_img = np.load(os.path.join(training_directory, 'arrayToBalance_int.npy'))
 
         self.training_raw = Path(os.path.join(training_directory, 'images/'))
@@ -59,6 +68,12 @@ class DatasetHandler:
         self.AUTO = tf.data.experimental.AUTOTUNE
 
     def process_img_train(self, ind: float) -> np.array:
+        """
+        Process an image given its index
+
+        :param ind: index of image in directory list
+        :return: volume and labels (output mask)
+        """
 
         img_vert = self.array_training_img[ind]
 
@@ -113,11 +128,22 @@ class DatasetHandler:
         return x, y
 
     def get_img_train(self, i: tf.Tensor) -> np.array:
+        """
+        Get volume and labels given image index - basically decoding an eager tensor
+
+        :param i: index
+        :return: volume and labels (output mask)
+        """
         i = i.numpy()  # Decoding from the EagerTensor object
         x, y = self.process_img_train(i)
         return x, y
 
     def getTrainingDataset(self) -> tf.data.Dataset:
+        """
+        Get training dataset generator
+
+        :return: training dataset generator
+        """
         z = tf.range(self.training_size)
 
         dataset = tf.data.Dataset.from_generator(lambda: z, tf.int32)
@@ -136,6 +162,12 @@ class DatasetHandler:
         return dataset
 
     def process_img_valid(self, ind: float) -> np.array:
+        """
+        Process an image given its index
+
+        :param ind: index of image in directory list
+        :return: volume and labels (output mask)
+        """
 
         img_vert = self.array_valid_img[ind]
 
@@ -184,11 +216,23 @@ class DatasetHandler:
         return x, y
 
     def get_img_valid(self, i: tf.Tensor) -> np.array:
+        """
+        Get volume and labels given image index - basically decoding an eager tensor
+
+        :param i: index
+        :return: volume and labels (output mask)
+        """
+
         i = i.numpy()  # Decoding from the EagerTensor object
         x, y = self.process_img_valid(i)
         return x, y
 
     def getValidDataset(self) -> tf.data.Dataset:
+        """
+        Get validation dataset generator
+
+        :return: validation dataset generator
+        """
         z = tf.range(self.validation_size)
 
         dataset = tf.data.Dataset.from_generator(lambda: z, tf.int32)
@@ -207,6 +251,11 @@ class DatasetHandler:
         return dataset
 
     def get_datasets(self):
+        """
+        Get training and validation dataset generators
+
+        :return: training and validation dataset generators
+        """
 
         # distribute the dataset according to the strategy
         train_dist_ds = tf.distribute.get_strategy().experimental_distribute_dataset(self.getTrainingDataset())
@@ -228,7 +277,7 @@ class DatasetHandler:
 
 
 class Trainer:
-    """ Generic trainer
+    """ Trainer for vertebrae segmentation network training
 
     Parameters
     -----------
@@ -285,14 +334,12 @@ class Trainer:
             Size of the training dataset
         validation_size : scalar
             Size of the validation dataset
-        loss_fn : function
-            Loss function
-        accuracy_fn : function
-            Accuracy function
         BATCH_SIZE : int
             Batch size
         EPOCHS : int
             Number of epochs to train
+        save_step : int
+            Every how many epochs the model is saved
         """
 
         self.EPOCHS = EPOCHS
@@ -379,6 +426,13 @@ class Trainer:
 
     @tf.function
     def weight_loss_bound(self, y_true, y_pred):
+        """
+        Weighted boundary loss for training
+
+        :param y_true: labels
+        :param y_pred: probabilities
+        :return: loss result
+        """
         y_true_array = tf.reshape(y_true[:, :, :, :, 0], [self.BATCH_SIZE, 128, 128, 128, 1])
         y_true_dist_map = tf.reshape(y_true[:, :, :, :, 1], [self.BATCH_SIZE, 128, 128, 128, 1])
         power_2 = tf.fill(y_true_array.shape, 2.0)
@@ -401,6 +455,13 @@ class Trainer:
 
     @tf.function
     def dice_hard_coe(self, y_true, y_pred):
+        """
+        Calculate hard Dice Coefficient
+
+        :param y_true: labels
+        :param y_pred: probabilities
+        :return: hard Dice score
+        """
 
         threshold = 0.5
         axis = (1, 2, 3)

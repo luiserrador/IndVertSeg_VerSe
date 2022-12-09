@@ -91,52 +91,29 @@ def normalize_vol_max_min(vol, max_dt, min_dt):
     return vol
 
 
-def padding_up_down(vol, mask):
-    vol1 = np.pad(vol, ((0, 0), (0, 0), (128, 128)))
-    mask1 = np.pad(mask, ((0, 0), (0, 0), (128, 128)))
-
-    return vol1, mask1
-
-
 def padding_up_down_ones(vol, mask):
+    """
+    Padd volume up and down
+
+    :param vol: volume - NumPy array
+    :param mask: output mask - NumPy array
+    :return: padded volume and mask - NumPy Array
+    """
     vol1 = np.pad(vol, ((0, 0), (0, 0), (128, 128)), constant_values=((-1, -1), (-1, -1), (-1, -1)))
     mask1 = np.pad(mask, ((0, 0), (0, 0), (128, 128)))
 
     return vol1, mask1
 
 
-def check_padding(vol, mask):
-    patch_size = np.array((256, 256, 256))
-    padd = patch_size - np.array(vol.shape)
-
-    padd[padd < 0] = 0
-    padd = padd / 2
-
-    vol1 = np.pad(vol, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
-                        (math.ceil(padd[2]), math.ceil(padd[2]))))
-    mask1 = np.pad(mask, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
-                          (math.ceil(padd[2]), math.ceil(padd[2]))))
-
-    return vol1, mask1
-
-
 def check_padding_ones(vol, mask):
+    """
+    Padd volume up and down if volume size smaller than 256x256x256
+
+    :param vol: volume - NumPy array
+    :param mask: output mask - NumPy array
+    :return: padded volume and mask - NumPy Array
+    """
     patch_size = np.array((256, 256, 256))
-    padd = patch_size - np.array(vol.shape)
-
-    padd[padd < 0] = 0
-    padd = padd / 2
-
-    vol1 = np.pad(vol, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
-                        (math.ceil(padd[2]), math.ceil(padd[2]))), constant_values=((-1, -1), (-1, -1), (-1, -1)))
-    mask1 = np.pad(mask, ((math.ceil(padd[0]), math.ceil(padd[0])), (math.ceil(padd[1]), math.ceil(padd[1])),
-                          (math.ceil(padd[2]), math.ceil(padd[2]))))
-
-    return vol1, mask1
-
-
-def check_padding_ones_valid(vol, mask):
-    patch_size = np.array((128, 128, 128))
     padd = patch_size - np.array(vol.shape)
 
     padd[padd < 0] = 0
@@ -361,167 +338,3 @@ def roll_imgs(vol, memory, mask, slice_bef, nb_1s):
 
     return vol, memory, mask
 
-
-######################################### KD DATASET #####################################################
-
-# def process_img_train(ind):
-#     img_vert = array_training_img[ind]
-#
-#     patch_nifti = nib.load(training_raw[img_vert[0]])
-#     mask_patch_nifti = nib.load(training_derivatives[img_vert[0]])
-#
-#     patch = patch_nifti.get_fdata()
-#     mask_patch = mask_patch_nifti.get_fdata()
-#
-#     mask_save = np.where(mask_patch == img_vert[1], 1, 0)
-#     memory_save = np.where((mask_patch < img_vert[1]) & (mask_patch != 0), 1, 0)
-#     nb_1s = np.where(mask_save == 1)[0].size
-#
-#     ## -> AUGMENTATION
-#     if np.random.uniform() > 0.5:
-#         patch, memory_save, mask_save = flip_vol(patch, memory_save, mask_save)
-#     patch = rand_mul_shi_vox(patch)
-#     patch, memory_save, mask_save = zoom_z(patch, memory_save, mask_save, nb_1s)
-#     patch, memory_save, mask_save = rotate3D(patch, memory_save, mask_save, nb_1s)
-#     if np.random.uniform() > 0.2:
-#         patch = gauss_noise(patch)
-#     if np.random.uniform() > 0.2:
-#         patch = gauss_blur(patch)
-#     if np.random.uniform() > 0.7:
-#         memory_save = clean_memory(memory_save)
-#     nb_1s = np.where(mask_save == 1)[0].size
-#
-#     slice_bef = calc_centr_vertebras(mask_save, 1)
-#     slice_bef = slice_bef - 64
-#
-#     for f in range(3):
-#         if slice_bef[f] + 128 >= mask_save.shape[f]:
-#             overplus = slice_bef[f] + 128 - mask_save.shape[f]
-#             slice_bef[f] = slice_bef[f] - overplus
-#         elif slice_bef[f] < 0:
-#             slice_bef[f] = 0
-#
-#     patch, memory_save, mask_save, slice_bef = roll_imgs(patch, memory_save, mask_save, slice_bef, nb_1s)
-#
-#     ## -> SLICE 128X128X128
-#
-#     patch = patch[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
-#     patch = np.where(patch > 1, 1, patch)
-#     patch = np.where(patch < -1, -1, patch)
-#     memory_save = memory_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
-#                   slice_bef[2]:slice_bef[2] + 128]
-#     mask_save = mask_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
-#                 slice_bef[2]:slice_bef[2] + 128]
-#
-#     ## -> X = patch + memory
-#
-#     x = np.zeros((128, 128, 128, 2))
-#     x[:, :, :, 0] = patch
-#     x[:, :, :, 1] = memory_save
-#
-#     ## -> Y = mask + distance map
-#
-#     dist = calc_dist_map(mask_save)
-#     y = np.zeros((128, 128, 128, 2))
-#     y[:, :, :, 0] = mask_save
-#     y[:, :, :, 1] = dist
-#
-#     return x, y
-#
-#
-# def get_img_train(i):
-#     i = i.numpy()  # Decoding from the EagerTensor object
-#     x, y = process_img_train(i)
-#     return x, y
-#
-#
-# def getTrainingDataset():
-#     z = tf.range(2814)
-#
-#     dataset = tf.data.Dataset.from_generator(lambda: z, tf.int32)
-#
-#     dataset = dataset.shuffle(buffer_size=len(z), reshuffle_each_iteration=True)
-#
-#     dataset = dataset.map(lambda i: tf.py_function(func=get_img_train,
-#                                                    inp=[i],
-#                                                    Tout=[tf.float32,
-#                                                          tf.float32]
-#                                                    ),
-#                           num_parallel_calls=8)
-#
-#     dataset = dataset.batch(BATCH_SIZE).repeat().prefetch(1)
-#
-#     return dataset
-#
-#
-# def process_img_valid(ind):
-#     img_vert = array_valid_img[ind]
-#
-#     patch_nifti = nib.load(valid_raw[img_vert[0]])
-#     mask_patch_nifti = nib.load(valid_derivatives[img_vert[0]])
-#
-#     patch = patch_nifti.get_fdata()
-#     mask_patch = mask_patch_nifti.get_fdata()
-#
-#     mask_save = np.where(mask_patch == img_vert[1], 1, 0)
-#     memory_save = np.where((mask_patch < img_vert[1]) & (mask_patch != 0), 1, 0)
-#
-#     slice_bef = calc_centr_vertebras(mask_save, 1)
-#     slice_bef = slice_bef - 64
-#
-#     for f in range(3):
-#         if slice_bef[f] + 128 >= mask_save.shape[f]:
-#             overplus = slice_bef[f] + 128 - mask_save.shape[f]
-#             slice_bef[f] = slice_bef[f] - overplus
-#         elif slice_bef[f] < 0:
-#             slice_bef[f] = 0
-#
-#     ## -> SLICE 128X128X128
-#
-#     patch = patch[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128, slice_bef[2]:slice_bef[2] + 128]
-#     patch = np.where(patch > 1, 1, patch)
-#     patch = np.where(patch < -1, -1, patch)
-#     memory_save = memory_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
-#                   slice_bef[2]:slice_bef[2] + 128]
-#     mask_save = mask_save[slice_bef[0]:slice_bef[0] + 128, slice_bef[1]:slice_bef[1] + 128,
-#                 slice_bef[2]:slice_bef[2] + 128]
-#
-#     ## -> X = patch + memory
-#
-#     x = np.zeros((128, 128, 128, 2))
-#     x[:, :, :, 0] = patch
-#     x[:, :, :, 1] = memory_save
-#
-#     ## -> Y = mask + distance map
-#
-#     dist = calc_dist_map(mask_save)
-#     y = np.zeros((128, 128, 128, 2))
-#     y[:, :, :, 0] = mask_save
-#     y[:, :, :, 1] = dist
-#
-#     return x, y
-#
-#
-# def get_img_valid(i):
-#     i = i.numpy()  # Decoding from the EagerTensor object
-#     x, y = process_img_valid(i)
-#     return x, y
-#
-#
-# def getValidDataset():
-#     z = tf.range(1494)
-#
-#     dataset = tf.data.Dataset.from_generator(lambda: z, tf.int32)
-#
-#     dataset = dataset.shuffle(buffer_size=len(z), reshuffle_each_iteration=True)
-#
-#     dataset = dataset.map(lambda i: tf.py_function(func=get_img_valid,
-#                                                    inp=[i],
-#                                                    Tout=[tf.float32,
-#                                                          tf.float32]
-#                                                    ),
-#                           num_parallel_calls=8)
-#
-#     dataset = dataset.batch(BATCH_SIZE).repeat().prefetch(1)
-#
-#     return dataset

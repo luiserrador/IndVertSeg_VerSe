@@ -84,8 +84,6 @@ class MyTestCase(unittest.TestCase):
         assert abs(np.mean(new_data.ravel())) > 0.05
         assert np.std(new_data.ravel()) < 0.8
 
-    # TODO: test paddings
-
     def testFlipVol(self):
         """Test flip_vol"""
         

@@ -13,6 +13,18 @@ from ML_3D_Unet.utils.layers_func import create_unet3d
 
 
 def gaussian(xL, yL, zL, H, W, D, sigma=10):
+    """
+    Create gaussian
+
+    :param xL: x center coordinate of the gaussian
+    :param yL: y center coordinate of the gaussian
+    :param zL: z center coordinate of the gaussian
+    :param H: volume height
+    :param W: volume width
+    :param D: volume depth
+    :param sigma: gaussian sigma
+    :return: gaussian centered at xL, yL and zL with sigma=sigma
+    """
     channel = [math.exp(-((c - xL) ** 2 + (r - yL) ** 2 + (t - zL) ** 2) / (2 * sigma ** 2)) for r in range(H) for c in
                range(W) for t in range(D)]
     channel = np.array(channel, dtype=np.float32)
@@ -21,7 +33,11 @@ def gaussian(xL, yL, zL, H, W, D, sigma=10):
     return channel
 
 
-class ArtificialDataset(tf.data.Dataset):
+class TrainingDataset(tf.data.Dataset):
+    """
+    Training dataset generator for heatmap network training
+    """
+
     def _generator(num_samples):
 
         training_raw = Path('Gaussian/Training/vol_ctd/')
@@ -80,7 +96,10 @@ class ArtificialDataset(tf.data.Dataset):
         )
 
 
-class ArtificialDatasetValid(tf.data.Dataset):
+class ValidationDataset(tf.data.Dataset):
+    """
+    Validation dataset generator for heatmap network training
+    """
 
     def _generator(num_samples):
 
@@ -129,18 +148,36 @@ class ArtificialDatasetValid(tf.data.Dataset):
 
 
 def get_training_dataset(batch_size):
-    dataset = ArtificialDataset().shuffle(40).batch(batch_size).repeat().prefetch(tf.data.experimental.AUTOTUNE)
+    """
+    Get training dataset generator
+
+    :param batch_size: batch size
+    :return: dataset generator
+    """
+    dataset = TrainingDataset().shuffle(40).batch(batch_size).repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
     return dataset
 
 
 def get_valid_dataset(batch_size):
-    dataset = ArtificialDatasetValid().batch(batch_size).repeat().prefetch(tf.data.experimental.AUTOTUNE)
+    """
+    Get validation dataset generator
+
+    :param batch_size: batch size
+    :return: dataset generator
+    """
+    dataset = ValidationDataset().batch(batch_size).repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
     return dataset
 
 
 def get_datasets(batch_size):
+    """
+    Get both training and validation dataset generators
+
+    :param batch_size: batch size
+    :return: training and validation dataset generators
+    """
     training_dataset = tf.distribute.get_strategy().experimental_distribute_dataset(get_training_dataset(batch_size))
     valid_dataset = tf.distribute.get_strategy().experimental_distribute_dataset(get_valid_dataset(batch_size))
 
@@ -148,6 +185,11 @@ def get_datasets(batch_size):
 
 
 def get_unet_heatmap():
+    """
+    Create U-Net for spine location heatmap
+
+    :return: 3D U-Net model -> tensorflow Model
+    """
     model = create_unet3d([64, 64, 128, 1], n_convs=2, n_filters=[8, 16, 32, 64], ksize=[3, 3, 3], padding='same',
                           activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=4,
                           upsampling=True)
@@ -165,6 +207,12 @@ def get_unet_heatmap():
 
 
 def kl_dice(y_true, y_pred):
+    """
+    Loss fucntion for spine location network training: sum of the Kullback-Leibler divergence with the soft Dice ratio.
+
+    :return: loss function result
+    """
+
     kl = tf.keras.losses.KLDivergence()
     first_term = kl(y_true, y_pred)
     inse = tf.reduce_sum(tf.multiply(y_pred, y_true))
