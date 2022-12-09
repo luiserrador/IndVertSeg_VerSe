@@ -15,9 +15,12 @@ Download VerSe dataset:
 ```
 $ python get_verse_data.py
 ```
-## 1.1 Training spine location network
 
-- TODO
+## 1.1 Training spine location network
+```
+$ python pre_processing_heatmap.py
+$ python train_heatmap.py
+```
 
 ## 1.2 Training segmentation network
 ```
