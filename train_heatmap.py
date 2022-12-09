@@ -14,6 +14,8 @@ optimizer = tf.keras.optimizers.Adam
 model_dir = 'tf_ckpt_heatmap'
 n_epochs = 300
 
+print('\nTraining Heatmap Network')
+
 trainer = Trainer(model, optimizer, lr, model_dir)
 trainer.train(train_ds=train_data, valid_ds=valid_data, train_size=train_size, validation_size=valid_size,
               loss_fn=kl_dice, accuracy_fn=tf.keras.metrics.mean_squared_error, BATCH_SIZE=batch_size, EPOCHS=300,

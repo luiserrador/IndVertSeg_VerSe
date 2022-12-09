@@ -21,6 +21,8 @@ optimizer = tf.keras.optimizers.Adam
 model_dir = 'tf_ckpt_teacher_scratch'
 n_epochs = 45
 
+print('\nTraining Segmentation Network')
+
 trainer = Trainer(model, optimizer, lr, model_dir)
 trainer.train(train_ds=train_data, valid_ds=valid_data, train_size=training_size, validation_size=validation_size,
               BATCH_SIZE=batch_size, EPOCHS=45)
