@@ -1,6 +1,7 @@
 from pathlib import Path
 from utils.pre_preocessing_heatmap_utils import *
 
+
 print('Preprocessing training data')
 
 training_v19_raw = Path('VerSe19/dataset-verse19training/rawdata/')
