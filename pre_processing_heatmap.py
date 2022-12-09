@@ -1,7 +1,7 @@
 from pathlib import Path
 from utils.pre_preocessing_heatmap_utils import *
 
-# Training data
+print('Preprocessing training data')
 
 training_v19_raw = Path('VerSe19/dataset-verse19training/rawdata/')
 training_v20_raw = Path('VerSe20/dataset-01training/rawdata/')
@@ -22,7 +22,7 @@ training_points = training_v19_points + training_v20_points
 
 save_heatmap_data_training(training_raw, training_points)
 
-# Validation Data
+print('Preprocessing validation data')
 
 valid_v19_raw = Path('VerSe19/dataset-verse19validation/rawdata/')
 valid_v20_raw = Path('VerSe20/dataset-02validation/rawdata/')
