@@ -45,7 +45,7 @@ class ArtificialDataset(tf.data.Dataset):
 
             heat = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
 
-            for _, coordx, coordy, coordz in ctd_iso[1:]:
+            for _, coordy, coordx, coordz in ctd_iso[1:]:
                 heat += gaussian(coordx, coordy, coordz, 64, 64, 128)
 
             heat = heat / np.max(heat)
@@ -102,7 +102,7 @@ class ArtificialDatasetValid(tf.data.Dataset):
 
             heat = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
 
-            for _, coordx, coordy, coordz in ctd_iso[1:]:
+            for _, coordy, coordx, coordz in ctd_iso[1:]:
                 heat += gaussian(coordx, coordy, coordz, 64, 64, 128)
 
             heat = heat / np.max(heat)
