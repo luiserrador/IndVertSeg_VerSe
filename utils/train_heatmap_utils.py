@@ -196,7 +196,7 @@ def get_unet_heatmap():
 
     x = model.layers[-3].output
     x = tf.keras.layers.Conv3D(2, 1, padding='same')(x)
-    x = tf.keras.layers.Activation('sigmoid')(x)
+    x = tf.keras.layers.Activation('softmax')(x)
 
     new_model = tf.keras.models.Model(inputs=model.input, outputs=x)
 
