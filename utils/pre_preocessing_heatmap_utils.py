@@ -1,6 +1,11 @@
+"""pre_processing_heatmap_utils.py: Everything for processing and prepare VerSe dataset for spine location heatmap training."""
+
+__author__ = "Luis Serrador"
+
 import nibabel as nib
 import numpy as np
 from utils.data_utilities import reorient_to, resample_nib, load_centroids, reorient_centroids_to, rescale_centroids, save_centroids
+
 import skimage.transform as skTrans
 
 
