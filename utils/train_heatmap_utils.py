@@ -190,8 +190,8 @@ def get_unet_heatmap():
 
     :return: 3D U-Net model -> tensorflow Model
     """
-    model = create_unet3d([64, 64, 128, 1], n_convs=2, n_filters=[8, 16, 32], ksize=[3, 3, 3], padding='same',
-                          activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=3,
+    model = create_unet3d([64, 64, 128, 1], n_convs=2, n_filters=[8, 16, 32, 64], ksize=[3, 3, 3], padding='same',
+                          activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=4,
                           upsampling=True)
 
     x = model.layers[-3].output
