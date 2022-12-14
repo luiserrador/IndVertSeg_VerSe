@@ -46,6 +46,9 @@ class TrainingDataset(tf.data.Dataset):
         training_raw = [f for f in training_raw.resolve().glob('*.npy') if f.is_file()]
         training_ctd = [f for f in training_ctd.resolve().glob('*.json') if f.is_file()]
 
+        training_raw = sorted(training_raw)
+        training_ctd = sorted(training_ctd)
+
         max_dt = 3071
         min_dt = -1024
 
@@ -53,7 +56,7 @@ class TrainingDataset(tf.data.Dataset):
         np.random.shuffle(ind_img)
         np.random.shuffle(ind_img)
 
-        for r in range(num_samples):  # num_samples
+        for r in range(num_samples):
 
             img = np.load(training_raw[ind_img[r]])
             img = np.clip(img, -1024, 3071)
@@ -68,7 +71,6 @@ class TrainingDataset(tf.data.Dataset):
 
             ## -> Normalization [-1,1]
             img = normalize_vol_max_min(img, max_dt, min_dt)
-            #             heat = normalize_vol_max_min(heat, np.amax(heat), 0)
 
             ## -> Augmentation
             check_1s = 0
@@ -103,21 +105,23 @@ class ValidationDataset(tf.data.Dataset):
 
     def _generator(num_samples):
 
-        training_raw = Path('Gaussian/Validation/vol_ctd/')
-        training_ctd = Path('Gaussian/Validation/ctd/')
+        valid_raw = Path('Gaussian/Validation/vol_ctd/')
+        valid_ctd = Path('Gaussian/Validation/ctd/')
 
-        training_raw = [f for f in training_raw.resolve().glob('*.npy') if f.is_file()]
-        training_ctd = [f for f in training_ctd.resolve().glob('*.json') if f.is_file()]
+        valid_raw = [f for f in valid_raw.resolve().glob('*.npy') if f.is_file()]
+        valid_ctd = [f for f in valid_ctd.resolve().glob('*.json') if f.is_file()]
+
+        valid_raw = sorted(valid_raw)
+        valid_ctd = sorted(valid_ctd)
 
         max_dt = 3071
         min_dt = -1024
 
-        #         for r in range(num_samples): #num_samples
-        for r in range(num_samples):  # num_samples
+        for r in range(num_samples):
 
-            img = np.load(training_raw[r])
+            img = np.load(valid_raw[r])
             img = np.clip(img, -1024, 3071)
-            ctd_iso = load_centroids(training_ctd[r])
+            ctd_iso = load_centroids(valid_ctd[r])
 
             heat = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.float32)
 
