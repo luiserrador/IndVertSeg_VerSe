@@ -194,18 +194,32 @@ def get_unet_heatmap():
 
     :return: 3D U-Net model -> tensorflow Model
     """
-    model = create_unet3d([64, 64, 128, 1], n_convs=2, n_filters=[8, 16, 32, 64], ksize=[3, 3, 3], padding='same',
-                          activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=4,
+    model = create_unet3d([64, 64, 128, 1], n_convs=2, n_filters=[8, 16, 32], ksize=[3, 3, 3], padding='same',
+                          activation='relu', pooling='max', norm='batch_norm', dropout=[0], depth=3,
                           upsampling=True)
 
     x = model.layers[-3].output
     x = tf.keras.layers.Conv3D(2, 1, padding='same')(x)
     x = tf.keras.layers.Activation('softmax')(x)
 
-    new_model = tf.keras.models.Model(inputs=model.input, outputs=x)
+    model = tf.keras.models.Model(inputs=model.input, outputs=x)
 
-    for _ in range(6):
-        new_model._layers.pop(4)
+    layers = [l for l in model.layers]
+
+    to_concat = dict()
+    x = layers[0].output
+    for j in range(1, len(layers)):
+        if j <= 3 or j > 9:
+            if 'maxpool' in layers[j].name:
+                to_concat[str(layers[j].name[-1])] = x
+                print(str(layers[j].name[-1]))
+            if 'concat' in layers[j].name:
+                print(str(layers[j].name[-1]))
+                x = layers[j]([x, to_concat[str(int(layers[j].name[-1])+1)]])
+            else:
+                x = layers[j](x)
+
+    new_model = tf.keras.models.Model(inputs=layers[0].input, outputs=x)
 
     return new_model
 
