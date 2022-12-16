@@ -12,6 +12,8 @@ After moving to the repo directory, the first thing to do is to clone [ML_3D_Une
 $ git clone https://github.com/luiserrador/ML_3D_Unet.git
 ```
 Download VerSe dataset:
+
+**Note:** We strongly recommend to test the repository with the data available. So, test steps 1.1 and 1.2 before downloanding all the data!
 ```
 $ python get_verse_data.py
 ```
