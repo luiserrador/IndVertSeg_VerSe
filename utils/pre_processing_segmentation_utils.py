@@ -33,7 +33,7 @@ def get_to_balance_array(training_derivatives):
                 nb_vert[r - 1] += 1
 
     mul_vert = np.amax(nb_vert) / nb_vert
-    np.save('mul_vert.npy', mul_vert)
+    # np.save('mul_vert.npy', mul_vert)
     return mul_vert
 
 
@@ -74,7 +74,7 @@ def get_array_data_training(training_derivatives, mul_vert):
 
                     mult -= 1
 
-    np.save('arrayData_balanced.npy', arrayData)
+    # np.save('arrayData_balanced.npy', arrayData)
     return arrayData
 
 
@@ -105,7 +105,7 @@ def get_array_data_valid(valid_derivatives):
 
                 nb_vert[r-1] += 1
 
-    np.save('arrayDataValid.npy', arrayDataValid)
+    # np.save('arrayDataValid.npy', arrayDataValid)
 
     return arrayDataValid
 
@@ -120,8 +120,12 @@ def save_iso_croped_data_training(training_raw, training_derivatives, arrayData)
     :return: None
     """
 
-    if not os.path.exists('Data/'):
-        os.mkdir('Data/')
+    save_path_ctd = 'Data/Training/images/'
+    save_path_vol = 'Data/Training/masks/'
+
+    if not os.path.exists(save_path_ctd):
+        os.makedirs(save_path_ctd)
+        os.makedirs(save_path_vol)
 
     array_img = np.empty(0)
 
@@ -210,7 +214,7 @@ def save_iso_croped_data_training(training_raw, training_derivatives, arrayData)
 
     array_img = np.reshape(array_img, (len(array_img) // 2, 2))
 
-    np.save('Data/arrayToBalance.npy', array_img)
+    np.save('Data/Training/arrayToBalance.npy', array_img)
 
     print('# Saved Images: {}'.format(i + 1))
     print('# Images Balanced: {}'.format(len(array_img)))
@@ -227,6 +231,13 @@ def save_iso_croped_data_validation(valid_raw, valid_derivatives, arrayDataValid
     :param arrayDataValid: array to balance data
     :return: None
     """
+
+    save_path_ctd = 'Data/Validation/images/'
+    save_path_vol = 'Data/Validation/masks/'
+
+    if not os.path.exists(save_path_ctd):
+        os.makedirs(save_path_ctd)
+        os.makedirs(save_path_vol)
 
     array_img = np.empty(0)
 

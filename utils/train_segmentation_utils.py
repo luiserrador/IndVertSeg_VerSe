@@ -6,6 +6,7 @@ import os
 import nibabel as nib
 import tensorflow as tf
 import time
+import sys
 
 from pathlib import Path
 from utils.data_utils import *
@@ -321,7 +322,7 @@ class Trainer:
             print("Initializing from scratch.")
             self.step = 0
 
-    def train(self, train_ds, valid_ds, train_size, validation_size, BATCH_SIZE, EPOCHS, save_step=1):
+    def train(self, train_ds, valid_ds, train_size, validation_size, BATCH_SIZE, EPOCHS, save_step=1, valid_step=5):
         """ Train the model
 
         Parameters
@@ -373,25 +374,31 @@ class Trainer:
 
                 # validation run at the end of each epoch
                 if (self.step // STEPS_PER_EPOCH) > self.epoch:
-                    # validation run
-                    valid_epoch_steps = 0
-                    self.valid_step(valid_data_iter)
-                    valid_epoch_steps += self.VALIDATION_STEPS_PER_CALL
+
+                    if self.epoch % valid_step == 0:
+                        # validation run
+                        valid_epoch_steps = 0
+                        self.valid_step(valid_data_iter)
+                        valid_epoch_steps += self.VALIDATION_STEPS_PER_CALL
+                        history['val_loss'].append(self.valid_loss.result().numpy() / (self.BATCH_SIZE * valid_epoch_steps))
+                        history['val_acc'].append(
+                            self.valid_accuracy.result().numpy() / (self.BATCH_SIZE * valid_epoch_steps))
+
+                    else:
+                        history['val_loss'].append(0.0)
+                        history['val_acc'].append(0.0)
 
                     # compute metrics
                     history['acc'].append(self.train_accuracy.result().numpy() / (self.BATCH_SIZE * epoch_steps))
-                    history['val_acc'].append(
-                        self.valid_accuracy.result().numpy() / (self.BATCH_SIZE * valid_epoch_steps))
                     history['loss'].append(self.train_loss.result().numpy() / (self.BATCH_SIZE * epoch_steps))
-                    history['val_loss'].append(self.valid_loss.result().numpy() / (self.BATCH_SIZE * valid_epoch_steps))
 
                     # report metrics
                     epoch_time = time.time() - epoch_start_time
-                    print('time: {:0.1f}s'.format(epoch_time),
-                          'loss: {:0.4f}'.format(history['loss'][-1]),
-                          'acc: {:0.4f}'.format(history['acc'][-1]),
-                          'val_loss: {:0.4f}'.format(history['val_loss'][-1]),
-                          'val_acc: {:0.4f}'.format(history['val_acc'][-1]))
+                    sys.stdout.write('time: {:0.1f}s'.format(epoch_time),
+                                     'loss: {:0.4f}'.format(history['loss'][-1]),
+                                     'acc: {:0.4f}'.format(history['acc'][-1]),
+                                     'val_loss: {:0.4f}'.format(history['val_loss'][-1]),
+                                     'val_acc: {:0.4f}'.format(history['val_acc'][-1]))
 
                     # save checkpoint and training_step
                     if save_step and self.epoch % save_step == 0:

@@ -3,8 +3,10 @@
 __author__ = "Luis Serrador"
 
 import nibabel as nib
+import os
 import numpy as np
-from utils.data_utilities import reorient_to, resample_nib, load_centroids, reorient_centroids_to, rescale_centroids, save_centroids
+from utils.data_utilities import reorient_to, resample_nib, load_centroids, reorient_centroids_to, rescale_centroids, \
+    save_centroids
 
 import skimage.transform as skTrans
 
@@ -31,6 +33,13 @@ def save_heatmap_data_training(training_raw, training_points):
     :param training_points: directorys of training centroids
     :return: None
     """
+
+    save_path_ctd = 'Gaussian/Training/ctd/'
+    save_path_vol = 'Gaussian/Training/vol_ctd/'
+
+    if not os.path.exists(save_path_ctd):
+        os.makedirs(save_path_ctd)
+        os.makedirs(save_path_vol)
 
     save_path = 'Gaussian/Training/'
 
@@ -77,6 +86,13 @@ def save_heatmap_data_validation(valid_raw, valid_points):
     :param valid_points: directorys of validation centroids
     :return: None
     """
+
+    save_path_ctd = 'Gaussian/Validation/ctd'
+    save_path_vol = 'Gaussian/Validation/vol_ctd'
+
+    if not os.path.exists(save_path_ctd):
+        os.makedirs(save_path_ctd)
+        os.makedirs(save_path_vol)
 
     save_path = 'Gaussian/Validation/'
 
