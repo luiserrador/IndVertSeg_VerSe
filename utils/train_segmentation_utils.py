@@ -39,7 +39,7 @@ class DatasetHandler:
         :param validation_size: size of the validation size
         :param batch_size: batch size
         """
-        self.array_training_img = np.load(os.path.join(training_directory, 'arrayToBalance_int.npy'))
+        self.array_training_img = np.load(os.path.join(training_directory, 'arrayToBalance.npy'))
 
         self.training_raw = Path(os.path.join(training_directory, 'images/'))
         self.training_derivatives = Path(os.path.join(training_directory, 'masks/'))
@@ -394,11 +394,11 @@ class Trainer:
 
                     # report metrics
                     epoch_time = time.time() - epoch_start_time
-                    sys.stdout.write('time: {:0.1f}s'.format(epoch_time),
-                                     'loss: {:0.4f}'.format(history['loss'][-1]),
-                                     'acc: {:0.4f}'.format(history['acc'][-1]),
-                                     'val_loss: {:0.4f}'.format(history['val_loss'][-1]),
-                                     'val_acc: {:0.4f}'.format(history['val_acc'][-1]))
+                    sys.stdout.write('time: {:0.1f}s'.format(epoch_time))
+                    sys.stdout.write('loss: {:0.4f}'.format(history['loss'][-1]))
+                    sys.stdout.write('acc: {:0.4f}'.format(history['acc'][-1]))
+                    sys.stdout.write('val_loss: {:0.4f}'.format(history['val_loss'][-1]))
+                    sys.stdout.write('val_acc: {:0.4f}'.format(history['val_acc'][-1]))
 
                     # save checkpoint and training_step
                     if save_step and self.epoch % save_step == 0:
