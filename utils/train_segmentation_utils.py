@@ -375,7 +375,7 @@ class Trainer:
                 # validation run at the end of each epoch
                 if (self.step // STEPS_PER_EPOCH) > self.epoch:
 
-                    if self.epoch % valid_step == 0:
+                    if (self.epoch + 1) % valid_step == 0:
                         # validation run
                         valid_epoch_steps = 0
                         self.valid_step(valid_data_iter)
@@ -401,7 +401,7 @@ class Trainer:
                     sys.stdout.write('val_acc: {:0.4f}'.format(history['val_acc'][-1]))
 
                     # save checkpoint and training_step
-                    if save_step and self.epoch % save_step == 0:
+                    if save_step and (self.epoch + 1) % save_step == 0:
                         model_path = (os.path.join(self.model_dir, 'model_epoch_%s.h5' % (self.epoch + 1)))
                     self.model.save(model_path)
                     self.manager.save()
