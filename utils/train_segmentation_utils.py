@@ -76,8 +76,7 @@ class DatasetHandler:
         :return: volume and labels (output mask)
         """
 
-        img_vert = self.array_training_img[ind]
-
+        img_vert = self.array_training_img[ind].astype(int)
         patch_nifti = nib.load(self.training_raw[img_vert[0]])
         mask_patch_nifti = nib.load(self.training_derivatives[img_vert[0]])
 
