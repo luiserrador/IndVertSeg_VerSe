@@ -30,6 +30,16 @@ $ python pre_processing_segmentation.py
 $ python train_segmentation.py
 ```
 
+## 2. Inference
+
+The inference functionality has been integrated directly into a larger software system and is not available as a standalone script.
+To maintain consistency with our deployment environment and reduce confusion, we only provide the training scripts and a pseudocode description of the inference process.
+
+If you're interested in reusing the model for research or development, please refer to the pseudocode below or reach out for collaboration.
+<p align="center">
+  <img src="https://github.com/luiserrador/IndVertSeg_VerSe/blob/master/images/inference_vertebrae_segmentation.jpg" width=500>
+</p>
+
 ## BibTeX Citation
 
 If you use this repo in a scientific publication, we would appreciate using the following citations:
